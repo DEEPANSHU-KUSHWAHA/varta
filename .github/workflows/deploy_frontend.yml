@@ -21,4 +21,4 @@ jobs:
           username: ${{ secrets.UNAUX_FTP_USER }}
           password: ${{ secrets.UNAUX_FTP_PASS }}
           local-dir: ./ 
-          server-dir: /htdocs/
+          server-dir: /varta-n.unaux.com/htdocs/
