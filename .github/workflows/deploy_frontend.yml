@@ -1,0 +1,24 @@
+name: Deploy Frontend to unaux
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.UNAUX_FTP_SERVER }}
+          username: ${{ secrets.UNAUX_FTP_USER }}
+          password: ${{ secrets.UNAUX_FTP_PASS }}
+          local-dir: ./ 
+          server-dir: /htdocs/
