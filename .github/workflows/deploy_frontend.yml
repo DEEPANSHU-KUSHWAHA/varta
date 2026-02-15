@@ -34,9 +34,23 @@ jobs:
       - name: Run tests
         run: vendor/bin/phpunit --testdox
 
+  static-analysis:
+    name: PHPStan Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --level=max src
+
   deploy:
     name: Deploy to unaux
-    needs: [lint, test]   # 👈 deploy only runs if lint + tests succeed
+    needs: [lint, test, static-analysis]   # 👈 deploy only runs if all checks succeed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
