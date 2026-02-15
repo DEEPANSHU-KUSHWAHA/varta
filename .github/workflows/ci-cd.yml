@@ -1,0 +1,64 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: PHP Lint Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      - name: Run PHP lint
+        run: |
+          find . -type f -name "*.php" -print0 | xargs -0 -n1 php -l
+
+  test:
+    name: PHPUnit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run tests
+        run: vendor/bin/phpunit --testdox
+
+  static-analysis:
+    name: PHPStan Static Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --level=max src
+
+  deploy:
+    name: Deploy to unaux
+    needs: [lint, test, static-analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.UNAUX_FTP_SERVER }}
+          username: ${{ secrets.UNAUX_FTP_USER }}
+          password: ${{ secrets.UNAUX_FTP_PASS }}
+          local-dir: ./ 
+          server-dir: /varta-n.unaux.com/htdocs/
