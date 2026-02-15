@@ -20,9 +20,23 @@ jobs:
         run: |
           find . -type f -name "*.php" -print0 | xargs -0 -n1 php -l
 
+  test:
+    name: PHPUnit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run tests
+        run: vendor/bin/phpunit --testdox
+
   deploy:
     name: Deploy to unaux
-    needs: lint   # 👈 ensures lint passes first
+    needs: [lint, test]   # 👈 deploy only runs if lint + tests succeed
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
