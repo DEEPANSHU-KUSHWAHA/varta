@@ -1,3 +1,3 @@
 <a href="/">
-    <img src="/assets/logo.png" alt="Logo"> MyApp
+    <img src="/resources/varta.png" alt="Varta"> Varta
 </a>
