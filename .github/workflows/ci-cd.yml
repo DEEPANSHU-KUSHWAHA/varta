@@ -47,6 +47,8 @@ jobs:
           php-version: '8.5.3'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
+      - name: Fix PHPStan permissions
+        run: chmod +x vendor/bin/phpstan
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --level=max app
 
