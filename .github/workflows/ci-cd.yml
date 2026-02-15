@@ -1,3 +1,4 @@
+# CI/CD workflow updated to restrict linting to app, tests, public only
 name: CI/CD Pipeline
 
 on:
