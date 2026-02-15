@@ -15,7 +15,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5.3'
+          php-version: '8.4'
       - name: Run PHP lint
         run: |
           find app tests public -type f -name "*.php" -print0 | xargs -0 -n1 php -l
@@ -28,7 +28,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5.3'
+          php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Fix PHPUnit permissions
@@ -44,7 +44,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.5.3'
+          php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Fix PHPStan permissions
