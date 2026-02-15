@@ -31,8 +31,8 @@ jobs:
           php-version: '8.5.3'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-      - name: Run tests
-        run: vendor/bin/phpunit --testdox
+      - name: Fix PHPUnit permissions
+        run: chmod +x vendor/bin/phpunit
       - name: Run tests
         run: vendor/bin/phpunit --testdox
 
