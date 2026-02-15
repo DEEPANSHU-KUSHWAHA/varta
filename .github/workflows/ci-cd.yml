@@ -33,6 +33,8 @@ jobs:
         run: composer install --no-interaction --prefer-dist
       - name: Run tests
         run: vendor/bin/phpunit --testdox
+      - name: Run tests
+        run: vendor/bin/phpunit --testdox
 
   static-analysis:
     name: PHPStan Static Analysis
