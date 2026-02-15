@@ -1,21 +1,32 @@
-name: Deploy Frontend to unaux
+name: CI/CD Pipeline
 
 on:
+  pull_request:
+    branches: [ main ]
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
-    name: Deploy to unaux
+  lint:
+    name: PHP Lint Check
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
-
     steps:
       - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+      - name: Run PHP lint
+        run: |
+          find . -type f -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: Deploy via FTP
+  deploy:
+    name: Deploy to unaux
+    needs: lint   # 👈 ensures lint passes first
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.UNAUX_FTP_SERVER }}
