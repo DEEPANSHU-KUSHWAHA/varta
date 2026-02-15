@@ -1,0 +1,20 @@
+.navbar {
+    display: flex;
+    justify-content: space-between; /* logo left, user right */
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #333; /* dark background */
+    color: #fff;
+}
+
+.navbar-left a,
+.navbar-right a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: bold;
+}
+
+.navbar-left img {
+    height: 40px;
+    vertical-align: middle;
+}

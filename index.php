@@ -1,6 +1,6 @@
 <?php
 // index.php
-include 'app/navbar.php';
+include 'app/navbar/index.php';
 ?>
 
 <h1>Welcome to Varta</h1>
