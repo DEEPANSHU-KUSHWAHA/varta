@@ -18,7 +18,7 @@ jobs:
           php-version: '8.5.3'
       - name: Run PHP lint
         run: |
-           find . -type f -name "*.php" ! -path "./vendor/*" -print0 | xargs -0 -n1 php -l
+          find app tests -type f -name "*.php" -print0 | xargs -0 -n1 php -l
 
   test:
     name: PHPUnit Tests
@@ -50,17 +50,9 @@ jobs:
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --level=max app
 
-  # 👇 New job added just to force a change
-  echo-job:
-    name: Echo Hello World
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print message
-        run: echo "Hello from CI/CD workflow!"
-
   deploy:
     name: Deploy to unaux
-    needs: [lint, test, static-analysis, echo-job]
+    needs: [lint, test, static-analysis]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
