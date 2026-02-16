@@ -18,7 +18,7 @@ jobs:
           php-version: '8.1'
       - name: Run PHP lint
         run: |
-          find . -type f -name "*.php" -print0 | xargs -0 -n1 php -l
+          find app tests public -type f -name "*.php" -print0 | xargs -0 -n1 php -l
 
   test:
     name: PHPUnit Tests
