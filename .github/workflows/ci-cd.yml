@@ -48,20 +48,6 @@ jobs:
       - name: Run PHPStan
         run: php ./vendor/bin/phpstan analyse --level=max app
 
-  build:
-    name: Build Docker Image (Optional)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build Docker image
-        run: docker build -t varta-app:latest .
-      - name: Push to Docker Hub
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
-          docker tag varta-app:latest ${{ secrets.DOCKER_USER }}/varta-app:latest
-          docker push ${{ secrets.DOCKER_USER }}/varta-app:latest
-
   deploy:
     name: Deploy to cPanel
     needs: [lint, test, static-analysis]
@@ -76,3 +62,15 @@ jobs:
           password: ${{ secrets.CPANEL_FTP_PASS }}
           local-dir: ./public
           server-dir: /public_html/
+
+  metrics:
+    name: Send Metrics to Grafana Cloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send build metrics
+        run: |
+          echo "pipeline_status=success" | curl -u ${{ secrets.GRAFANA_USER }}:${{ secrets.GRAFANA_API_KEY }} \
+            -X POST \
+            -H "Content-Type: text/plain" \
+            --data-binary @- \
+            https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push
