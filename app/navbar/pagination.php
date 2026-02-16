@@ -1,5 +1,8 @@
 <div class="navbar-pagination">
-    <a href="?page=1">1</a>
-    <a href="?page=2">2</a>
-    <a href="?page=3">3</a>
+    <a href="?view=local" class="nav-option">
+        <img src="/resources/tab/local.png" alt="Local" class="nav-icon"> Local
+    </a>
+    <a href="?view=globle" class="nav-option">
+        <img src="/resources/tab/globe.png" alt="Global" class="nav-icon"> Global
+    </a>
 </div>
