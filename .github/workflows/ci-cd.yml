@@ -44,13 +44,8 @@ jobs:
           restore-keys: composer-${{ runner.os }}-
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-      - name: Ensure PHPUnit is executable
-        run: chmod +x ./vendor/bin/phpunit
-      - name: Run tests
-        run: ./vendor/bin/phpunit --testdox
       - name: Run tests
         run: php ./vendor/bin/phpunit --testdox
-
 
   static-analysis:
     name: PHPStan Static Analysis
@@ -69,10 +64,8 @@ jobs:
           restore-keys: composer-${{ runner.os }}-
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-      - name: Ensure PHPStan is executable
-        run: chmod +x ./vendor/bin/phpstan
       - name: Run PHPStan
-        run: ./vendor/bin/phpstan analyse --level=max app
+        run: php ./vendor/bin/phpstan analyse --level=max app
 
   deploy:
     name: Deploy to unaux
