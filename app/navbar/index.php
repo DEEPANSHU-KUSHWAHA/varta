@@ -11,11 +11,13 @@
 <?php
 // Dynamic template loader
 $view = $_GET['view'] ?? 'local'; // default to local
-$templateFile = __DIR__ . "/{$view}.php";
+$templateFile = __DIR__ . '/' . (string) $view . '.php';
+
 
 if (file_exists($templateFile)) {
     include $templateFile;
 } else {
-    echo "<p>Navbar template not found: {$view}</p>";
+    echo "<p>Navbar template not found: " . htmlspecialchars((string) $view) . "</p>";
+
 }
 ?>
