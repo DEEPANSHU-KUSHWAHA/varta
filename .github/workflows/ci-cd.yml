@@ -1,4 +1,5 @@
 # CI/CD workflow updated to restrict linting to app, tests, public only
+# Updated lint job to skip vendor
 name: CI/CD Pipeline
 
 on:

@@ -1,3 +1,4 @@
+# Updated lint job to skip vendor
 name: CI/CD Pipeline
 
 on:
