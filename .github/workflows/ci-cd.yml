@@ -32,8 +32,8 @@ jobs:
           php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-      - name: Fix PHPUnit permissions
-        run: chmod +x vendor/bin/phpunit
+      - name: Ensure PHPUnit is executable
+        run: chmod +x ./vendor/bin/phpunit
       - name: Run tests
         run: ./vendor/bin/phpunit --testdox
 
@@ -48,10 +48,10 @@ jobs:
           php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
-      - name: Fix PHPStan permissions
-        run: chmod +x vendor/bin/phpstan
+      - name: Ensure PHPStan is executable
+        run: chmod +x ./vendor/bin/phpstan
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --level=max app
+        run: ./vendor/bin/phpstan analyse --level=max app
 
   deploy:
     name: Deploy to unaux
