@@ -1,0 +1,12 @@
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+    }
+    .navbar-right {
+        display: none;
+    }
+    .navbar-toggle {
+        display: block;
+        cursor: pointer;
+    }
+}
