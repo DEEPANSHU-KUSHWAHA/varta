@@ -1,3 +1,3 @@
 <a href="/">
-    <img src="/resources/varta.png" alt="Varta"> Varta
+    <img src="/resources/logo/varta.png" alt="Varta">
 </a>

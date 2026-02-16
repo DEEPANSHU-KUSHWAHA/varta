@@ -1,1 +1,1 @@
-<a href="/login.php">Login</a> | <a href="/profile.php">Profile</a>
+<a href="/profile.php"><img src="/resources/logo/profile.png" alt="Varta"></a>
