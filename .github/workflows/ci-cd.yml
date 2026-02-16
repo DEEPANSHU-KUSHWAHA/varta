@@ -48,6 +48,9 @@ jobs:
         run: chmod +x ./vendor/bin/phpunit
       - name: Run tests
         run: ./vendor/bin/phpunit --testdox
+      - name: Run tests
+        run: php ./vendor/bin/phpunit --testdox
+
 
   static-analysis:
     name: PHPStan Static Analysis
