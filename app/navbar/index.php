@@ -11,7 +11,7 @@
         <?php include __DIR__ . '/dropdown.php'; ?>
     </div>
 </nav>
-
+<link rel="stylesheet" href="/base.css">
 <script>
 function setActiveGlow(view) {
 	const navbar = document.getElementById('navbar');

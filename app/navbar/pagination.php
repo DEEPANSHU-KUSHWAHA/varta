@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="base.css">
 <div class="navbar-pagination">
     <a href="?view=local" class="nav-option">
         <img src="/resources/tab/local.png" alt="Local" class="nav-icon"> Local
