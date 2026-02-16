@@ -35,7 +35,7 @@ jobs:
       - name: Fix PHPUnit permissions
         run: chmod +x vendor/bin/phpunit
       - name: Run tests
-        run: vendor/bin/phpunit --testdox
+        run: ./vendor/bin/phpunit --testdox
 
   static-analysis:
     name: PHPStan Static Analysis
