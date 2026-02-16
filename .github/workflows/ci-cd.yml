@@ -1,4 +1,4 @@
-# CI/CD workflow updated with lint restriction, PHPStan fix, and PHPUnit permission fix
+# CI/CD workflow with lint restriction, PHPStan fix, PHPUnit permission fix, and Composer cache
 name: CI/CD Pipeline
 
 on:
@@ -17,6 +17,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
       - name: Run PHP lint
         run: |
           find app tests public -type f -name "*.php" -print0 | xargs -0 -n1 php -l
@@ -30,6 +36,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Ensure PHPUnit is executable
@@ -46,6 +58,12 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: composer-${{ runner.os }}-
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Ensure PHPStan is executable
