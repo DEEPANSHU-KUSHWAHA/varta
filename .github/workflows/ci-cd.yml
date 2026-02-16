@@ -1,10 +1,9 @@
-# CI/CD workflow with lint restriction, PHPStan fix, PHPUnit permission fix, and Composer cache
 name: CI/CD Pipeline
 
 on:
-  pull_request:
-    branches: [ main ]
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 jobs:
@@ -16,13 +15,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.composer/cache
-          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
+          php-version: '8.2'
       - name: Run PHP lint
         run: |
           find app tests public -type f -name "*.php" -print0 | xargs -0 -n1 php -l
@@ -35,13 +28,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.composer/cache
-          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
+          php-version: '8.2'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run tests
@@ -55,20 +42,28 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
-      - name: Cache Composer dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.composer/cache
-          key: composer-${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
+          php-version: '8.2'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run PHPStan
         run: php ./vendor/bin/phpstan analyse --level=max app
 
+  build:
+    name: Build Docker Image (Optional)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t varta-app:latest .
+      - name: Push to Docker Hub
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "${{ secrets.DOCKER_PASS }}" | docker login -u "${{ secrets.DOCKER_USER }}" --password-stdin
+          docker tag varta-app:latest ${{ secrets.DOCKER_USER }}/varta-app:latest
+          docker push ${{ secrets.DOCKER_USER }}/varta-app:latest
+
   deploy:
-    name: Deploy to unaux
+    name: Deploy to cPanel
     needs: [lint, test, static-analysis]
     runs-on: ubuntu-latest
     steps:
@@ -76,8 +71,8 @@ jobs:
       - name: Upload via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.UNAUX_FTP_SERVER }}
-          username: ${{ secrets.UNAUX_FTP_USER }}
-          password: ${{ secrets.UNAUX_FTP_PASS }}
-          local-dir: ./
-          server-dir: /varta-n.unaux.com/htdocs/
+          server: ${{ secrets.CPANEL_FTP_SERVER }}
+          username: ${{ secrets.CPANEL_FTP_USER }}
+          password: ${{ secrets.CPANEL_FTP_PASS }}
+          local-dir: ./public
+          server-dir: /public_html/
