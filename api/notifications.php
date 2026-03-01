@@ -1,6 +1,10 @@
 <?php
-require '../resources/db.php';
+require_once __DIR__ . '/../resources/db.php';
 /** @var mysqli $conn */
+global $conn;
+
+require '../resources/db.php';
+
 $userId = $_GET['user_id'] ?? null;
 
 if ($userId) {

@@ -1,9 +1,13 @@
 <?php
+require_once __DIR__ . '/../resources/db.php';
+/** @var mysqli $conn */
+global $conn;
+
 require '../resources/db.php';
 require '../vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
-/** @var mysqli $conn */
+
 $token = $_POST['token'] ?? '';
 $message = $_POST['message'] ?? '';
 $type = $_POST['type'] ?? 'info';

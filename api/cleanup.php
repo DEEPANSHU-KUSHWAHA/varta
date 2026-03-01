@@ -1,6 +1,10 @@
 <?php
-require '../resources/db.php';
+require_once __DIR__ . '/../resources/db.php';
 /** @var mysqli $conn */
+global $conn;
+
+require '../resources/db.php';
+
 // Expire sessions older than 1 hour
 $expiry = time() - 3600;
 
