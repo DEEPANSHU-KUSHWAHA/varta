@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run tests
-        run: php ./vendor/bin/phpunit --testdox
+        run: vendor/bin/phpunit --testdox
 
   static-analysis:
     name: PHPStan Static Analysis
@@ -46,11 +46,25 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run PHPStan
-        run: php ./vendor/bin/phpstan analyse --level=max app
+        run: vendor/bin/phpstan analyse --level=max app
+
+  seed-database:
+    name: Seed Database
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install MySQL client
+        run: sudo apt-get install -y mysql-client
+      - name: Run schema.sql
+        run: |
+          mysql -h ${{ secrets.CPANEL_DB_HOST }} \
+                -u ${{ secrets.CPANEL_DB_USER }} \
+                -p${{ secrets.CPANEL_DB_PASS }} \
+                ${{ secrets.CPANEL_DB_NAME }} < database/schema.sql
 
   deploy:
     name: Deploy to cPanel
-    needs: [lint, test, static-analysis]
+    needs: [lint, test, static-analysis, seed-database]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,17 +74,5 @@ jobs:
           server: ${{ secrets.CPANEL_FTP_SERVER }}
           username: ${{ secrets.CPANEL_FTP_USER }}
           password: ${{ secrets.CPANEL_FTP_PASS }}
-          local-dir: ./public
+          local-dir: ./
           server-dir: /public_html/
-
-  metrics:
-    name: Send Metrics to Grafana Cloud
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send build metrics
-        run: |
-          echo "pipeline_status=success" | curl -u ${{ secrets.GRAFANA_USER }}:${{ secrets.GRAFANA_API_KEY }} \
-            -X POST \
-            -H "Content-Type: text/plain" \
-            --data-binary @- \
-            https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push
