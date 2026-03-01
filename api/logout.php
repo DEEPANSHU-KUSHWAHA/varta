@@ -1,29 +1,23 @@
 <?php
-require_once __DIR__ . '/../resources/db.php';
-/** @var mysqli $conn */
-global $conn;
+session_start();
 
-require '../resources/db.php';
+// Unset all session variables
+$_SESSION = [];
 
-$userId = $userId ?? 0;
-// Get token from request
-$token = $_POST['token'] ?? '';
+// Destroy the session
+session_destroy();
 
-if ($token) {
-    // Delete current session
-    $stmt = $conn->prepare("DELETE FROM sessions WHERE token=?");
-    $stmt->bind_param("s", $token);
-    $stmt->execute();
+// Clear session cookie if set
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
 }
 
-// Also clean up expired sessions (older than 1 hour)
-$expiry = time() - 3600;
-$stmt = $conn->prepare("DELETE FROM sessions WHERE UNIX_TIMESTAMP(created_at) < ?");
-$stmt->bind_param("i", $expiry);
-$stmt = $conn->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, 'User logged out', 'warning')");
-$stmt->bind_param("i", $userId);
-$stmt->execute();
-
-
-echo json_encode(["message" => "Logged out and expired sessions cleaned"]);
-?>
+// After destroying session 
+require_once __DIR__ . '/../resources/flash.php'; 
+set_flash("You have been logged out successfully.", "info"); 
+header("Location: /public/auth.php"); 
+exit;

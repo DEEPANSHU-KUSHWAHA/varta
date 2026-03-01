@@ -1,5 +1,9 @@
 <?php
 // public/login.php
+$update = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+$update->bind_param("i", $user['id']);
+$update->execute();
+
 ?>
 <!DOCTYPE html>
 <html lang="en">

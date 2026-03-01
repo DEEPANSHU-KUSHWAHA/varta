@@ -1,82 +1,100 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    color: #fff;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
 .auth-container {
-    width: 340px;
-    background: rgba(0, 0, 0, 0.45);
-    padding: 35px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-    text-align: center;
+    width: 400px;
+    margin: 50px auto;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
 }
 
-.auth-container h2 {
+.auth-tabs {
+    display: flex;
+    justify-content: space-around;
     margin-bottom: 20px;
-    font-size: 1.8em;
 }
 
-.auth-container label {
+.auth-tabs button {
+    flex: 1;
+    padding: 10px;
+    cursor: pointer;
+    border: none;
+    background: #ddd;
+    transition: background 0.3s;
+}
+
+.auth-tabs button.active {
+    background: #333;
+    color: #fff;
+}
+
+form {
+    display: none;
+    opacity: 0;
+    transform: translateX(50px);
+    transition: all 0.4s ease;
+}
+
+form.active {
     display: block;
-    margin-top: 15px;
-    text-align: left;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+label {
+    display: block;
+    margin-top: 10px;
     font-weight: bold;
 }
 
-.auth-container input {
+input, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button[type="submit"] {
+    margin-top: 15px;
     width: 100%;
     padding: 10px;
-    margin-top: 5px;
-    border: none;
-    border-radius: 6px;
-    outline: none;
-}
-
-.auth-container button {
-    margin-top: 20px;
-    width: 100%;
-    padding: 12px;
-    background: #4CAF50; /* default green */
+    background: #333;
     color: #fff;
-    font-weight: bold;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background 0.3s ease;
 }
 
-.auth-container button:hover {
-    background: #45a049;
+button[type="submit"]:hover {
+    background: #555;
 }
 
-.auth-container p {
-    margin-top: 15px;
+#username-status {
+    font-size: 0.9em;
+    margin-top: 5px;
 }
 
-.auth-container a {
-    color: #00cfff;
-    text-decoration: none;
+.suggestion {
+    display: inline-block;
+    margin: 3px;
+    padding: 3px 6px;
+    background: #eee;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
 }
 
-.auth-container a:hover {
-    text-decoration: underline;
+.suggestion:hover {
+    background: #ccc;
 }
-
-/* Variants for different pages */
-.auth-container.signup button {
-    background: #2196F3; /* blue for signup */
+.flash {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
 }
-.auth-container.signup button:hover {
-    background: #1976D2;
-}
-
-.auth-container.logout {
-    font-size: 1.2em;
-}
+.flash.info { background: #e7f3fe; color: #31708f; }
+.flash.success { background: #dff0d8; color: #3c763d; }
+.flash.error { background: #f2dede; color: #a94442; }
