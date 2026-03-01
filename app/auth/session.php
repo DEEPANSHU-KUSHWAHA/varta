@@ -1,5 +1,6 @@
 <?php
-require '../resources/db.php';
+require __DIR__ . '/../../resources/db.php';
+
 /** @var mysqli $conn */
 $limit = 10;
 $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;

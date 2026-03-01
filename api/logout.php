@@ -1,6 +1,7 @@
 <?php
 require '../resources/db.php';
 /** @var mysqli $conn */
+$userId = $userId ?? 0;
 // Get token from request
 $token = $_POST['token'] ?? '';
 

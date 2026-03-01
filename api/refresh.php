@@ -3,6 +3,7 @@ require '../resources/db.php';
 require '../vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+$secret = $secret ?? '';
 /** @var mysqli $conn */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $refreshToken = $_POST['refresh_token'] ?? '';
