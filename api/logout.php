@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../resources/db.php';
 /** @var mysqli $conn */
 global $conn;
+require_once __DIR__ . '/../resources/flash.php';
 
 session_start();
 

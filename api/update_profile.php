@@ -7,7 +7,6 @@ require_once __DIR__ . '/../resources/flash.php';
 
 session_start();
 
-// Protect: only logged-in users can update
 if (!isset($_SESSION['user_id'])) {
     set_flash("You must be logged in to update your profile.", "error");
     header("Location: /public/auth.php");
@@ -15,20 +14,16 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
-
-// Collect form data
 $email  = trim($_POST['email'] ?? '');
 $phone  = trim($_POST['phone'] ?? '');
 $role   = trim($_POST['role'] ?? 'user');
 
-// ✅ Validate email format
 if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     set_flash("Invalid email format.", "error");
     header("Location: /public/dashboard.php");
     exit;
 }
 
-// ✅ Handle avatar upload
 $avatarPath = null;
 if (!empty($_FILES['avatar']['name'])) {
     $uploadDir = __DIR__ . '/../uploads/avatars/';
@@ -46,7 +41,6 @@ if (!empty($_FILES['avatar']['name'])) {
     }
 }
 
-// ✅ Build update query dynamically
 $query = "UPDATE users SET email = ?, phone = ?, role = ?";
 $params = [$email, $phone, $role];
 $types  = "sss";
