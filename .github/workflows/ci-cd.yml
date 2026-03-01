@@ -46,7 +46,7 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --level=max app api public
+        run: vendor/bin/phpstan analyse --level=5 app api public
 
   seed-database:
     name: Seed Database

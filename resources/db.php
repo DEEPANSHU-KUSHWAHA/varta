@@ -1,24 +1,13 @@
 <?php
-require '../app/auth/jwt.php';
-require '../resources/db.php';
+/** @var mysqli $conn */
+$host = getenv("CPANEL_DB_HOST");
+$user = getenv("CPANEL_DB_USER");
+$pass = getenv("CPANEL_DB_PASS");
+$db   = getenv("CPANEL_DB_NAME");
 
-$token = $_GET['token'] ?? '';
-$decoded = verifyJWT($token);
+$conn = new mysqli($host, $user, $pass, $db);
 
-if (!$decoded) {
-    die("Unauthorized");
+if ($conn->connect_error) {
+    die("Database connection failed: " . $conn->connect_error);
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home - Varta</title>
-    <link rel="stylesheet" href="public/css/navbar.css">
-</head>
-<body>
-    <?php include __DIR__ . '/../app/navbar/index.php'; ?>
-    <h2>Welcome to Varta</h2>
-    <p>Hello User #<?php echo $decoded->user_id; ?>, you are logged in.</p>
-</body>
-</html>
