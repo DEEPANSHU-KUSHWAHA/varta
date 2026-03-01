@@ -15,10 +15,10 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
       - name: Run PHP lint
         run: |
-          find app tests public -type f -name "*.php" -print0 | xargs -0 -n1 php -l
+          find app api public -type f -name "*.php" -print0 | xargs -0 -n1 php -l
 
   test:
     name: PHPUnit Tests
@@ -28,7 +28,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run tests
@@ -42,11 +42,11 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --level=max app
+        run: vendor/bin/phpstan analyse --level=max app api public
 
   seed-database:
     name: Seed Database
