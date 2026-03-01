@@ -52,23 +52,9 @@ jobs:
       - name: Run PHPStan
         run: php vendor/bin/phpstan analyse --level=5 app api public
 
-  seed-database:
-    name: Seed Database
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install MySQL client
-        run: sudo apt-get install -y mysql-client
-      - name: Run schema.sql
-        run: |
-          mysql -h ${{ secrets.CPANEL_DB_HOST }} \
-                -u ${{ secrets.CPANEL_DB_USER }} \
-                -p${{ secrets.CPANEL_DB_PASS }} \
-                ${{ secrets.CPANEL_DB_NAME }} < database/schema.sql
-
   deploy:
     name: Deploy to cPanel
-    needs: [lint, test, static-analysis, seed-database]
+    needs: [lint, test, static-analysis]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
