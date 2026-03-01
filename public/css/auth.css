@@ -1,0 +1,82 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.auth-container {
+    width: 340px;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.auth-container h2 {
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+.auth-container label {
+    display: block;
+    margin-top: 15px;
+    text-align: left;
+    font-weight: bold;
+}
+
+.auth-container input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+}
+
+.auth-container button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background: #4CAF50; /* default green */
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.auth-container button:hover {
+    background: #45a049;
+}
+
+.auth-container p {
+    margin-top: 15px;
+}
+
+.auth-container a {
+    color: #00cfff;
+    text-decoration: none;
+}
+
+.auth-container a:hover {
+    text-decoration: underline;
+}
+
+/* Variants for different pages */
+.auth-container.signup button {
+    background: #2196F3; /* blue for signup */
+}
+.auth-container.signup button:hover {
+    background: #1976D2;
+}
+
+.auth-container.logout {
+    font-size: 1.2em;
+}

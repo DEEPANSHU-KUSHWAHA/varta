@@ -1,0 +1,67 @@
+/* Base sidebar styles */
+.sidebar {
+    margin-top: 80px; /* push below logo */
+    background: rgba(0, 0, 0, 0.45);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    width: 200px;
+    transition: transform 0.3s ease;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    margin: 15px 0;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+    display: block;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.3s ease;
+}
+
+.sidebar a:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+/* Responsive rules */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        top: 70px; /* below logo/navbar */
+        left: 0;
+        height: 100%;
+        width: 220px;
+        transform: translateX(-100%); /* hidden by default */
+        z-index: 1000;
+    }
+
+    .sidebar.active {
+        transform: translateX(0); /* slide in when active */
+    }
+
+    /* Overlay background when sidebar is open */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 999;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+}
