@@ -3,7 +3,7 @@ require '../resources/db.php';
 
 // Get token from request
 $token = $_POST['token'] ?? '';
-
+/** @var mysqli $conn */
 if ($token) {
     // Delete current session
     $stmt = $conn->prepare("DELETE FROM sessions WHERE token=?");

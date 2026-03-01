@@ -1,6 +1,6 @@
 <?php
 require '../resources/db.php';
-
+/** @var mysqli $conn */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userId = $_POST['user_id'] ?? null;
     $message = $_POST['message'] ?? '';

@@ -1,6 +1,6 @@
 <?php
 require '../resources/db.php';
-
+/** @var mysqli $conn */
 // Expire sessions older than 1 hour
 $expiry = time() - 3600;
 

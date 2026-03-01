@@ -1,6 +1,6 @@
 <?php
 require '../resources/db.php';
-
+/** @var mysqli $conn */
 $userId = $_GET['user_id'] ?? null;
 
 if ($userId) {

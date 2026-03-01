@@ -4,7 +4,7 @@ require '../vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 use OTPHP\TOTP;
-
+/** @var mysqli $conn */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = $_POST['username'];
     $password = $_POST['password'];
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $conn->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, 'New login detected', 'success')");
             $stmt->bind_param("i", $user['id']);
             $stmt->execute();
-            
+
 
 
             echo json_encode([

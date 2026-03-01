@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . '/../../resources/db.php';
 require __DIR__ . '/../../app/auth/jwt.php';
-
+/** @var mysqli $conn */
 $token = $_GET['token'] ?? '';
 $decoded = verifyJWT($token);
 
