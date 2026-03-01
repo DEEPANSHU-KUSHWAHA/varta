@@ -1,8 +1,9 @@
 <?php
 session_start();
 
-// If user is not logged in and not already on login/signup, force them to login
 $page = $_GET['page'] ?? 'home';
+
+// If not logged in and not on login/signup, force redirect
 if (!isset($_SESSION['user_id']) && !in_array($page, ['login', 'signup'])) {
     header("Location: index.php?page=login");
     exit;
@@ -16,8 +17,13 @@ if (!isset($_SESSION['user_id']) && !in_array($page, ['login', 'signup'])) {
     <link rel="stylesheet" href="public/css/navbar.css">
 </head>
 <body>
-    <?php include __DIR__ . '/app/navbar/index.php'; ?>
-    <?php include __DIR__ . '/app/sidebar/index.php'; ?>
+    <?php
+    // Show navbar + sidebar only if logged in
+    if (isset($_SESSION['user_id'])) {
+        include __DIR__ . '/app/navbar/index.php';
+        include __DIR__ . '/app/sidebar/index.php';
+    }
+    ?>
 
     <div id="content">
         <?php

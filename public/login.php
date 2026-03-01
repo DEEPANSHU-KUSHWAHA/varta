@@ -1,52 +1,30 @@
+<?php
+// public/login.php
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Login - Varta</title>
-    <link rel="stylesheet" href="public/css/navbar.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
-    <?php include __DIR__ . '/../app/navbar/index.php'; ?>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form method="POST" action="/api/login.php">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required autocomplete="username">
 
-    <h2>Login</h2>
-<form id="loginForm">
-    <label>Username:</label>
-    <input type="text" name="username" required><br>
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required autocomplete="current-password">
 
-    <label>Password:</label>
-    <input type="password" name="password" required><br>
+            <label for="otp">One-Time Password (OTP)</label>
+            <input type="text" id="otp" name="otp" required autocomplete="one-time-code">
 
-    <label>OTP:</label>
-    <input type="text" name="otp" required><br>
+            <button type="submit">Login</button>
+        </form>
 
-    <label>
-        <input type="checkbox" name="remember" value="1"> Remember Me
-    </label><br>
-
-    <button type="submit">Login</button>
-</form>
-
-
-    <div id="loginResult"></div>
-
-    <script>
-    $("#loginForm").on("submit", function(e) {
-        e.preventDefault();
-        $.ajax({
-            url: "../api/login.php",
-            type: "POST",
-            data: $(this).serialize(),
-            success: function(response) {
-                let res = JSON.parse(response);
-                if(res.access_token){
-                    window.location.href = "home.php?token=" + res.access_token;
-                } else {
-                    $("#loginResult").text(res.error || "Login failed");
-                }
-            }
-        });
-    });
-    </script>
+        <p>Don’t have an account? <a href="index.php?page=signup">Sign up here</a></p>
+    </div>
 </body>
 </html>
