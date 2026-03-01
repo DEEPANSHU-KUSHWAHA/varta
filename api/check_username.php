@@ -1,5 +1,9 @@
 <?php
 require_once __DIR__ . '/../resources/db.php';
+/** @var mysqli $conn */
+global $conn;
+
+require_once __DIR__ . '/../resources/db.php';
 
 header('Content-Type: application/json');
 

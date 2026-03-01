@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/../resources/db.php';
+/** @var mysqli $conn */
+global $conn;
+
 session_start();
 
 // Unset all session variables
