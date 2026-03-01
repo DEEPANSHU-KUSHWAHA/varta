@@ -3,7 +3,7 @@
         'name' => '__root__',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'fdb9a7a98e329c5626fd2ecae9ed09a889323e5e',
+        'reference' => '1fea8178521f859c4352493ba89b631872783ee0',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         '__root__' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'fdb9a7a98e329c5626fd2ecae9ed09a889323e5e',
+            'reference' => '1fea8178521f859c4352493ba89b631872783ee0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -72,6 +72,17 @@
             'install_path' => __DIR__ . '/../phar-io/version',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'phpgangsta/googleauthenticator' => array(
+            'pretty_version' => 'dev-master',
+            'version' => 'dev-master',
+            'reference' => '505c2af8337b559b33557f37cda38e5f843f3768',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpgangsta/googleauthenticator',
+            'aliases' => array(
+                0 => '9999999-dev',
+            ),
+            'dev_requirement' => false,
         ),
         'phpstan/phpstan' => array(
             'pretty_version' => '2.1.40',

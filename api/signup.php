@@ -1,11 +1,9 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-use PHPGangsta_GoogleAuthenticator;
+require_once __DIR__ . '/../resources/db.php'; // defines $conn
 
 session_start();
-require_once __DIR__ . '/../config/db.php'; // your DB connection
 
-// Collect form data
 $firstName   = $_POST['first_name'] ?? '';
 $middleName  = $_POST['middle_name'] ?? null;
 $lastName    = $_POST['last_name'] ?? null;
@@ -17,12 +15,11 @@ $confirmPass = $_POST['confirm_password'] ?? '';
 $role        = $_POST['role'] ?? 'user';
 $totpCode    = $_POST['totp'] ?? '';
 
-// Validate password match
 if ($password !== $confirmPass) {
     die("Passwords do not match.");
 }
 
-// Handle avatar upload
+// Avatar upload
 $avatarPath = null;
 if (!empty($_FILES['avatar']['name'])) {
     $uploadDir = __DIR__ . '/../uploads/avatars/';
@@ -36,49 +33,33 @@ if (!empty($_FILES['avatar']['name'])) {
     }
 }
 
-// Hash password securely
+// Hash password
 $passwordHash = password_hash($password, PASSWORD_ARGON2ID);
 
-// TOTP verification
+// Verify TOTP
 $ga = new PHPGangsta_GoogleAuthenticator();
 $secret = $_SESSION['totp_secret'] ?? null;
-
-if (!$secret) {
-    die("TOTP secret not found. Please restart signup.");
+if (!$secret || !$ga->verifyCode($secret, $totpCode, 2)) {
+    die("Invalid OTP.");
 }
 
-if (!$ga->verifyCode($secret, $totpCode, 2)) {
-    die("Invalid OTP. Please try again.");
-}
-
-// Encrypt TOTP secret before saving
-// Example using OpenSSL AES-256-CBC
-$encryptionKey = hex2bin(getenv('TOTP_ENC_KEY')); // store securely in env/config
+// Encrypt secret
+$encryptionKey = hex2bin(getenv('TOTP_ENC_KEY'));
 $iv = random_bytes(16);
 $encryptedSecret = openssl_encrypt($secret, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
-$totpSecretEnc = $iv . $encryptedSecret; // prepend IV for later decryption
+$totpSecretEnc = $iv . $encryptedSecret;
 
-// Insert into database
-$stmt = $pdo->prepare("
-    INSERT INTO users 
+// Insert user
+$stmt = $conn->prepare("INSERT INTO users 
     (username, email, phone, first_name, middle_name, last_name, avatar_path, password_hash, role, totp_secret_enc) 
-    VALUES (:username, :email, :phone, :first_name, :middle_name, :last_name, :avatar_path, :password_hash, :role, :totp_secret_enc)
-");
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param(
+    "sssssssssb",
+    $username, $email, $phone, $firstName, $middleName, $lastName,
+    $avatarPath, $passwordHash, $role, $totpSecretEnc
+);
+$stmt->send_long_data(9, $totpSecretEnc); // for VARBINARY
+$stmt->execute();
 
-$stmt->execute([
-    ':username'        => $username,
-    ':email'           => $email,
-    ':phone'           => $phone,
-    ':first_name'      => $firstName,
-    ':middle_name'     => $middleName,
-    ':last_name'       => $lastName,
-    ':avatar_path'     => $avatarPath,
-    ':password_hash'   => $passwordHash,
-    ':role'            => $role,
-    ':totp_secret_enc' => $totpSecretEnc
-]);
-
-// Clear temp secret
 unset($_SESSION['totp_secret']);
-
-echo "Account created successfully! You can now log in.";
+echo "Account created successfully!";

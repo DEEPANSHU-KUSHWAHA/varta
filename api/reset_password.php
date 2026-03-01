@@ -1,54 +1,44 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
-use PHPGangsta_GoogleAuthenticator;
+require_once __DIR__ . '/../resources/db.php';
 
 session_start();
-require_once __DIR__ . '/../config/db.php'; // your PDO connection
 
 $username    = $_POST['username'] ?? '';
 $newPassword = $_POST['new_password'] ?? '';
 $confirmPass = $_POST['confirm_password'] ?? '';
 $otp         = $_POST['totp'] ?? '';
 
-// Validate new password
 if ($newPassword !== $confirmPass) {
     die("Passwords do not match.");
 }
 
-// Fetch user record
-$stmt = $pdo->prepare("SELECT id, password_hash, totp_secret_enc FROM users WHERE username = :username LIMIT 1");
-$stmt->execute([':username' => $username]);
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
+$stmt = $conn->prepare("SELECT id, totp_secret_enc FROM users WHERE username = ? LIMIT 1");
+$stmt->bind_param("s", $username);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
 
 if (!$user) {
     die("User not found.");
 }
 
-// Decrypt TOTP secret
+// Decrypt secret
 $totpSecretEnc = $user['totp_secret_enc'];
-$encryptionKey = hex2bin(getenv('TOTP_ENC_KEY')); // secure key from env/config
+$encryptionKey = hex2bin(getenv('TOTP_ENC_KEY'));
 $iv = substr($totpSecretEnc, 0, 16);
 $ciphertext = substr($totpSecretEnc, 16);
 $secret = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
 
-if (!$secret) {
-    die("TOTP secret decryption failed.");
-}
-
-// Verify OTP
 $ga = new PHPGangsta_GoogleAuthenticator();
 if (!$ga->verifyCode($secret, $otp, 2)) {
     die("Invalid OTP. Password reset denied.");
 }
 
-// Hash new password
+// Update password
 $newHash = password_hash($newPassword, PASSWORD_ARGON2ID);
+$update = $conn->prepare("UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?");
+$update->bind_param("si", $newHash, $user['id']);
+$update->execute();
 
-// Update password in DB
-$update = $pdo->prepare("UPDATE users SET password_hash = :hash, updated_at = CURRENT_TIMESTAMP WHERE id = :id");
-$update->execute([
-    ':hash' => $newHash,
-    ':id'   => $user['id']
-]);
-
-echo "Password reset successful! You can now log in with your new password.";
+echo "Password reset successful!";
