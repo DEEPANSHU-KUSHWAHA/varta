@@ -1,56 +1,47 @@
 <?php
-require __DIR__ . '/../resources/db.php';
-require __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+use PHPGangsta_GoogleAuthenticator;
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-use OTPHP\TOTP;
-
-/** @var mysqli $conn */
 session_start();
+require_once __DIR__ . '/../config/db.php'; // your PDO connection
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $otp      = $_POST['otp'] ?? '';
+$username = $_POST['username'] ?? '';
+$password = $_POST['password'] ?? '';
+$otp      = $_POST['totp'] ?? '';
 
-    $stmt = $conn->prepare("SELECT * FROM users WHERE username=?");
-    $stmt->bind_param("s", $username);
-    $stmt->execute();
-    $user = $stmt->get_result()->fetch_assoc();
+// Fetch user record
+$stmt = $pdo->prepare("SELECT id, username, password_hash, totp_secret_enc FROM users WHERE username = :username LIMIT 1");
+$stmt->execute([':username' => $username]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && password_verify($password, $user['password_hash'])) {
-        $totp = TOTP::create($user['totp_secret']);
-        if ($totp->verify($otp)) {
-            // Create JWT access token
-            $secret = getenv("JWT_SECRET");
-            $payload = ["user_id" => $user['id'], "exp" => time() + 3600];
-            $accessToken = JWT::encode($payload, $secret, 'HS256');
-
-            // Create refresh token
-            $refreshToken = bin2hex(random_bytes(32));
-            $expiry = date("Y-m-d H:i:s", strtotime("+30 days"));
-
-            $stmt = $conn->prepare(
-                "INSERT INTO sessions (user_id, token, refresh_token, refresh_expiry) VALUES (?, ?, ?, ?)"
-            );
-            $stmt->bind_param("isss", $user['id'], $accessToken, $refreshToken, $expiry);
-            $stmt->execute();
-
-            $stmt = $conn->prepare(
-                "INSERT INTO notifications (user_id, message, type) VALUES (?, 'New login detected', 'success')"
-            );
-            $stmt->bind_param("i", $user['id']);
-            $stmt->execute();
-
-            // Set session and redirect
-            $_SESSION['user_id'] = $user['id'];
-            header("Location: /");
-            exit;
-        } else {
-            echo json_encode(["error" => "Invalid OTP"]);
-        }
-    } else {
-        echo json_encode(["error" => "Invalid credentials"]);
-    }
+if (!$user) {
+    die("Invalid username or password.");
 }
+
+// Verify password
+if (!password_verify($password, $user['password_hash'])) {
+    die("Invalid username or password.");
+}
+
+// Decrypt TOTP secret
+$totpSecretEnc = $user['totp_secret_enc'];
+$encryptionKey = hex2bin(getenv('TOTP_ENC_KEY')); // secure key from env/config
+$iv = substr($totpSecretEnc, 0, 16);
+$ciphertext = substr($totpSecretEnc, 16);
+$secret = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
+
+if (!$secret) {
+    die("TOTP secret decryption failed.");
+}
+
+// Verify OTP
+$ga = new PHPGangsta_GoogleAuthenticator();
+if (!$ga->verifyCode($secret, $otp, 2)) {
+    die("Invalid OTP.");
+}
+
+// Success: set session
+$_SESSION['user_id'] = $user['id'];
+$_SESSION['username'] = $user['username'];
+
+echo "Login successful! Welcome, " . htmlspecialchars($user['username']);
