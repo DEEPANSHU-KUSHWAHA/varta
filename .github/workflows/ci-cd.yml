@@ -47,8 +47,10 @@ jobs:
           php-version: '8.4'
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
+      - name: Make PHPStan executable
+        run: chmod +x vendor/bin/phpstan
       - name: Run PHPStan
-        run: vendor/bin/phpstan analyse --level=5 app api public
+        run: php vendor/bin/phpstan analyse --level=5 app api public
 
   seed-database:
     name: Seed Database
