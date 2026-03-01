@@ -8,6 +8,7 @@ class ComposerStaticInitea23898f486006c26e9d63481b5dce84
 {
     public static $files = array (
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
+        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '9b38cf48e83f5d8f60375221cd213eee' => __DIR__ . '/..' . '/phpstan/phpstan/bootstrap.php',
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
     );
@@ -15,7 +16,17 @@ class ComposerStaticInitea23898f486006c26e9d63481b5dce84
     public static $prefixLengthsPsr4 = array (
         'P' =>
         array (
+            'Psr\\Clock\\' => 10,
             'PhpParser\\' => 10,
+            'ParagonIE\\ConstantTime\\' => 23,
+        ),
+        'O' =>
+        array (
+            'OTPHP\\' => 6,
+        ),
+        'F' =>
+        array (
+            'Firebase\\JWT\\' => 13,
         ),
         'D' =>
         array (
@@ -24,9 +35,25 @@ class ComposerStaticInitea23898f486006c26e9d63481b5dce84
     );
 
     public static $prefixDirsPsr4 = array (
+        'Psr\\Clock\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/psr/clock/src',
+        ),
         'PhpParser\\' =>
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'ParagonIE\\ConstantTime\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
+        ),
+        'OTPHP\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/spomky-labs/otphp/src',
+        ),
+        'Firebase\\JWT\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
         ),
         'DeepCopy\\' =>
         array (

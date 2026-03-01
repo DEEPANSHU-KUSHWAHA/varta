@@ -1,0 +1,44 @@
+.sidebar {
+    width: 200px;
+    background: #222;
+    color: #fff;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+}
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+.sidebar ul li {
+    margin: 15px 0;
+}
+.sidebar ul li a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: bold;
+}
+.sidebar ul li a:hover {
+    color: #00aced;
+}
+.notifications {
+    margin-top: 20px;
+    background: #333;
+    padding: 10px;
+    border-radius: 5px;
+}
+.notifications ul {
+    list-style: none;
+    padding: 0;
+}
+.notifications li {
+    margin: 5px 0;
+    padding: 5px;
+    border-radius: 3px;
+}
+.notifications li.success { background: #2e7d32; color: #fff; }
+.notifications li.info { background: #0288d1; color: #fff; }
+.notifications li.warning { background: #f9a825; color: #000; }
+.notifications li.error { background: #c62828; color: #fff; }
