@@ -80,3 +80,41 @@ body {
 .flash.info { background: #e7f3fe; color: #31708f; }
 .flash.success { background: #dff0d8; color: #3c763d; }
 .flash.error { background: #f2dede; color: #a94442; }
+/* Pagination container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    font-family: inherit;
+}
+
+/* Pagination links */
+.pagination .page-link {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #0077cc;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    font-size: 14px;
+}
+
+.pagination .page-link:hover {
+    background-color: #005fa3;
+}
+
+/* Disabled state (optional) */
+.pagination .page-link.disabled {
+    background-color: #ccc;
+    color: #666;
+    pointer-events: none;
+}
+
+/* Current page indicator */
+.pagination span {
+    font-size: 14px;
+    color: #333;
+}
