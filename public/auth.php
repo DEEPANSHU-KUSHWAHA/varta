@@ -16,10 +16,7 @@ require_once __DIR__ . '/../resources/flash.php';
 <body>
     <div class="auth-container">
         <h2>Login</h2>
-
-        <!-- Flash message display -->
         <?php show_flash(); ?>
-
         <form method="POST" action="/api/login.php">
             <label for="login_username">Username</label>
             <input type="text" id="login_username" name="username" required autocomplete="username">
@@ -32,13 +29,11 @@ require_once __DIR__ . '/../resources/flash.php';
 
             <button type="submit">Login</button>
         </form>
-
         <p><a href="reset_password.php">Forgot your password?</a></p>
     </div>
 
     <div class="auth-container">
         <h2>Sign Up</h2>
-
         <form method="POST" action="/api/signup.php" enctype="multipart/form-data">
             <label for="first_name">First Name</label>
             <input type="text" id="first_name" name="first_name" required>
