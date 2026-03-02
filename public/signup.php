@@ -7,63 +7,83 @@ global $conn;
 require_once __DIR__ . '/../resources/flash.php';
 ?>
 
-<div class="signup-container">
-    <h2>Create Account</h2>
+<div class="auth-wrapper">
+    <div class="auth-box">
+        <h2>Create Account</h2>
 
-    <!-- Flash message display -->
-    <?php show_flash(); ?>
+        <!-- Flash message display -->
+        <?php show_flash(); ?>
 
-    <!-- Step 1: Basic Account Information -->
-    <form id="signup-form" method="POST">
-        <div class="form-section">
-            <h3>Step 1: Account Details</h3>
-            
-            <label for="first_name">First Name *</label>
-            <input type="text" id="first_name" name="first_name" required>
+        <!-- Step 1: Basic Account Information -->
+        <form id="signup-form" method="POST">
+            <div class="form-section">
+                <h3>Step 1: Account Details</h3>
+                
+                <div class="form-group">
+                    <label for="first_name">First Name *</label>
+                    <input type="text" id="first_name" name="first_name" required placeholder="First name">
+                </div>
 
-            <label for="email">Email *</label>
-            <input type="email" id="email" name="email" required>
+                <div class="form-group">
+                    <label for="email">Email *</label>
+                    <input type="email" id="email" name="email" required placeholder="Email address">
+                </div>
 
-            <label for="username">Username *</label>
-            <input type="text" id="username" name="username" required autocomplete="username">
+                <div class="form-group">
+                    <label for="username">Username *</label>
+                    <input type="text" id="username" name="username" required autocomplete="username" placeholder="Username">
+                </div>
 
-            <label for="password">Password *</label>
-            <input type="password" id="password" name="password" required autocomplete="new-password">
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input type="password" id="password" name="password" required autocomplete="new-password" placeholder="Password">
+                </div>
 
-            <label for="confirm_password">Confirm Password *</label>
-            <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password">
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password *</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required autocomplete="new-password" placeholder="Confirm password">
+                </div>
 
-            <div class="optional-fields">
-                <details>
-                    <summary>Additional Information (Optional)</summary>
-                    
-                    <label for="middle_name">Middle Name</label>
-                    <input type="text" id="middle_name" name="middle_name">
+                <div class="optional-fields">
+                    <details>
+                        <summary>Additional Information (Optional)</summary>
+                        
+                        <div class="form-group">
+                            <label for="middle_name">Middle Name</label>
+                            <input type="text" id="middle_name" name="middle_name" placeholder="Middle name">
+                        </div>
 
-                    <label for="last_name">Last Name</label>
-                    <input type="text" id="last_name" name="last_name">
+                        <div class="form-group">
+                            <label for="last_name">Last Name</label>
+                            <input type="text" id="last_name" name="last_name" placeholder="Last name">
+                        </div>
 
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone">
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" id="phone" name="phone" placeholder="Phone number">
+                        </div>
 
-                    <label for="avatar">Avatar</label>
-                    <input type="file" id="avatar" name="avatar" accept="image/*">
-                </details>
+                        <div class="form-group">
+                            <label for="avatar">Avatar</label>
+                            <input type="file" id="avatar" name="avatar" accept="image/*">
+                        </div>
+                    </details>
+                </div>
+
+                <button type="button" id="next-btn" class="btn btn-primary">Next: Setup 2FA</button>
             </div>
+        </form>
 
-            <button type="button" id="next-btn" class="btn btn-primary">Next: Setup 2FA</button>
-        </div>
-    </form>
-
-    <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
-        Already have an account? 
-        <a href="#" class="nav-option" data-page="login" style="color: var(--primary); text-decoration: none; font-weight: 600;">Login here</a>
-    </p>
+        <p style="text-align: center; margin-top: 20px; color: #666; font-size: 14px;">
+            Already have an account? 
+            <a href="#" class="nav-option" data-page="login" style="color: var(--primary); text-decoration: none; font-weight: 600;">Login here</a>
+        </p>
+    </div>
 </div>
 
 <!-- TOTP Setup Modal -->
-<div id="totp-modal" style="display: none;">
-    <div class="modal-content" style="max-width: 500px;">
+<div id="totp-modal">
+    <div class="modal-content">
         <div class="modal-header">
             <h2>🔐 Enable Two-Factor Authentication</h2>
             <button type="button" class="modal-close" id="close-totp-modal">&times;</button>
@@ -73,35 +93,35 @@ require_once __DIR__ . '/../resources/flash.php';
             <h3>Step 1: Scan QR Code</h3>
             <p>Open Google Authenticator or Authy on your phone and scan this QR code:</p>
             
-            <div id="qr-code-container" style="text-align: center; padding: 20px; background: #f5f5f5; border-radius: 8px;">
-                <img id="qr-code-img" alt="QR Code" style="max-width: 300px; height: auto;">
+            <div id="qr-code-container">
+                <img id="qr-code-img" alt="QR Code">
             </div>
 
             <h3 style="margin-top: 20px;">Step 2: Backup Secret Key</h3>
             <p style="color: #e74c3c; font-weight: bold;">⚠️ Save this key somewhere safe in case your authenticator app is lost:</p>
-            <div style="background: #f0f0f0; padding: 12px; border-radius: 6px; font-family: monospace; border-left: 4px solid var(--primary); word-break: break-all;">
-                <span id="secret-key" style="color: var(--primary); font-weight: bold;"></span>
+            <div id="secret-key-container">
+                <span id="secret-key"></span>
             </div>
-            <button type="button" id="copy-secret" class="btn" style="margin-top: 10px; width: 100%; background: #7f8c8d; color: white;">📋 Copy Secret Key</button>
+            <button type="button" id="copy-secret" class="btn" style="margin-top: 10px; width: 100%;">📋 Copy Secret Key</button>
 
             <h3 style="margin-top: 20px;">Step 3: Verify Code</h3>
             <p>Enter the 6-digit code from your authenticator app:</p>
-            <input type="text" id="totp-code" maxlength="6" placeholder="000000" style="text-align: center; letter-spacing: 0.5em; font-size: 24px; padding: 12px; border: 2px solid var(--light-gray); border-radius: 8px; width: 100%;" autocomplete="one-time-code" required>
+            <input type="text" id="totp-code" maxlength="6" placeholder="000000" autocomplete="one-time-code" required>
             <small style="display: block; margin-top: 8px; color: #666;">Make sure the code hasn't expired (changes every 30 seconds)</small>
 
             <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button type="button" id="back-btn" class="btn" style="flex: 1; background: #95a5a6; color: white;">Back</button>
-                <button type="button" id="verify-totp-btn" class="btn btn-primary" style="flex: 1;">✅ Verify & Create Account</button>
+                <button type="button" id="back-btn" class="btn">Back</button>
+                <button type="button" id="verify-totp-btn" class="btn btn-primary">✅ Verify & Create Account</button>
             </div>
         </div>
 
         <div id="totp-loading" style="text-align: center; padding: 40px; display: none;">
-            <div class="spinner" style="margin: 0 auto;"></div>
+            <div class="spinner"></div>
             <p>Verifying your account...</p>
         </div>
 
         <div id="totp-success" style="text-align: center; padding: 40px; display: none;">
-            <div style="font-size: 48px; margin-bottom: 15px;">✅</div>
+            <div class="checkmark">✅</div>
             <h3>Account Created Successfully!</h3>
             <p>Your two-factor authentication is now enabled.</p>
             <button type="button" class="btn btn-primary" style="width: 100%;">Return to Login</button>
@@ -137,6 +157,47 @@ require_once __DIR__ . '/../resources/flash.php';
     padding: 20px;
     border-bottom: 1px solid var(--light-gray);
 }
+
+#qr-code-container {
+    text-align: center;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+#qr-code-img {
+    max-width: 300px;
+    height: auto;
+}
+
+#secret-key-container {
+    background: #f0f0f0;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: monospace;
+    border-left: 4px solid var(--primary);
+    word-break: break-all;
+}
+
+#totp-code {
+    text-align: center;
+    letter-spacing: 0.5em;
+    font-size: 24px;
+    padding: 12px;
+    border: 2px solid var(--light-gray);
+    border-radius: 8px;
+    width: 100%;
+}
+
+.checkmark {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.spinner {
+    margin: 0 auto;
+}
+</style>
 
 .modal-header h2 {
     margin: 0;

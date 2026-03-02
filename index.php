@@ -18,6 +18,10 @@ if (!isset($_SESSION['user_id']) && !in_array($page, ['login', 'signup', 'home']
     <link rel="stylesheet" href="/public/css/sidebar.css">
     <link rel="stylesheet" href="/public/css/auth.css">
     <link rel="stylesheet" href="/public/css/home.css">
+    <?php if (in_array($page, ['login','signup'])): ?>
+        <!-- bring in the SPA style for auth screens (gradient background, animations, button styles) -->
+        <link rel="stylesheet" href="/public/css/spa.css">
+    <?php endif; ?>
 </head>
 <body>
     <!-- Logo always top-left -->

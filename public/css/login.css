@@ -1,3 +1,6 @@
+@import url('auth.css');
+
+/* fallback styles when auth.css/spa.css are not loaded directly */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
