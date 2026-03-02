@@ -1,51 +1,66 @@
 <?php
+
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../resources/db.php';
-/** @var mysqli $conn */
-global $conn;
 require_once __DIR__ . '/../resources/flash.php';
 
-require '../resources/db.php';
+header('Content-Type: application/json');
+session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $userId = $_POST['user_id'];
-    $username = $_POST['username'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+/** @var mysqli $conn */
+global $conn;
 
-    $avatarFile = null;
+try {
+    // ✅ Use session instead of POST for user_id (SECURITY FIX)
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception('Unauthorized');
+    }
+
+    $userId = $_SESSION['user_id'];
+    $email = trim($_POST['email'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+
+    // ✅ Validate email format
+    if ($email && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('Invalid email format');
+    }
+
+    $avatarPath = null;
     if (!empty($_FILES['avatar']['name'])) {
-        $targetDir = "../uploads/";
-        if (!is_dir($targetDir)) {
-            mkdir($targetDir, 0777, true);
+        $uploadDir = __DIR__ . '/../uploads/avatars/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
         }
-        $avatarFile = time() . "_" . basename($_FILES["avatar"]["name"]);
-        $targetFile = $targetDir . $avatarFile;
-        move_uploaded_file($_FILES["avatar"]["tmp_name"], $targetFile);
+        $fileName = uniqid() . "_" . basename($_FILES['avatar']['name']);
+        $targetFile = $uploadDir . $fileName;
+        if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $targetFile)) {
+            throw new Exception('Failed to upload avatar');
+        }
+        $avatarPath = '/uploads/avatars/' . $fileName;
     }
 
-    if (!empty($password)) {
-        $passwordHash = password_hash($password, PASSWORD_BCRYPT);
-        if ($avatarFile) {
-            $stmt = $conn->prepare("UPDATE users SET username=?, email=?, password_hash=?, avatar=? WHERE id=?");
-            $stmt->bind_param("ssssi", $username, $email, $passwordHash, $avatarFile, $userId);
-        } else {
-            $stmt = $conn->prepare("UPDATE users SET username=?, email=?, password_hash=? WHERE id=?");
-            $stmt->bind_param("sssi", $username, $email, $passwordHash, $userId);
-        }
-    } else {
-        if ($avatarFile) {
-            $stmt = $conn->prepare("UPDATE users SET username=?, email=?, avatar=? WHERE id=?");
-            $stmt->bind_param("sssi", $username, $email, $avatarFile, $userId);
-        } else {
-            $stmt = $conn->prepare("UPDATE users SET username=?, email=? WHERE id=?");
-            $stmt->bind_param("ssi", $username, $email, $userId);
-        }
+    $query = "UPDATE users SET email = ?, phone = ?";
+    $params = [$email, $phone];
+    $types = "ss";
+
+    if ($avatarPath) {
+        $query .= ", avatar_path = ?";
+        $params[] = $avatarPath;
+        $types .= "s";
     }
-    $stmt = $conn->prepare("INSERT INTO notifications (user_id, message, type) VALUES (?, 'Profile updated successfully', 'info')");
-    $stmt->bind_param("i", $userId);
+
+    $query .= ", updated_at = NOW() WHERE id = ?";
+    $params[] = $userId;
+    $types .= "i";
+
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$params);
     $stmt->execute();
 
-
-    echo json_encode(["message" => "Profile updated successfully"]);
+    http_response_code(200);
+    echo json_encode(['message' => 'Profile updated successfully']);
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode(['message' => $e->getMessage()]);
 }
 ?>
