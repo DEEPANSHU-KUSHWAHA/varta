@@ -10,7 +10,7 @@ require_once __DIR__ . '/../resources/flash.php';
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Varta - Authentication</title>
+    <title>Varta</title>
     <link rel="stylesheet" href="css/navbar.css">
     <link rel="stylesheet" href="css/sidebar.css">
     <link rel="stylesheet" href="css/auth.css">
