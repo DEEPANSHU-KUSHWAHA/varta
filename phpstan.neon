@@ -4,6 +4,6 @@ parameters:
         - app
         - api
         - public
-    autoload_files:
-        - %rootDir%/../resources/flash.php
-        - %rootDir%/../resources/db.php
+    bootstrapFiles:
+        - resources/flash.php
+        - resources/db.php
