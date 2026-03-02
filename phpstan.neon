@@ -5,5 +5,5 @@ parameters:
         - api
         - public
     bootstrapFiles:
+        - phpstan-stubs.php
         - resources/flash.php
-        - resources/db.php
