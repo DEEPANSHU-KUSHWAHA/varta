@@ -8,3 +8,4 @@ parameters:
         - phpstan-stubs.php
         - resources/flash.php
         - phpstan-stubs.php
+        - resources/pagination.php
