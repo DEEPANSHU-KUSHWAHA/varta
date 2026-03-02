@@ -18,7 +18,7 @@ $notifications = $result->fetch_all(MYSQLI_ASSOC);
 
 $countRes = $conn->query("SELECT COUNT(*) AS total FROM notifications");
 $total = $countRes->fetch_assoc()['total'];
-$totalPages = ceil($total / $limit);
+$totalPages = (int) ceil($total / $limit); // cast to int
 ?>
 <div class="auth-container">
     <h2>Notifications</h2>
@@ -31,5 +31,5 @@ $totalPages = ceil($total / $limit);
         <?php endforeach; ?>
     </ul>
 
-    <?php render_pagination($page, $totalPages, 'notifications.php'); ?>
+    <?php render_pagination($page, $totalPages, 'notifications'); ?>
 </div>
