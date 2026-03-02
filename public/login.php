@@ -1,9 +1,8 @@
 <?php
-// public/login.php
-$update = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-$update->bind_param("i", $user['id']);
-$update->execute();
-
+session_start();
+require_once __DIR__ . '/../resources/db.php';
+/** @var mysqli $conn */
+global $conn;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,7 +22,7 @@ $update->execute();
             <input type="password" id="password" name="password" required autocomplete="current-password">
 
             <label for="otp">One-Time Password (OTP)</label>
-            <input type="text" id="otp" name="otp" required autocomplete="one-time-code">
+            <input type="text" id="otp" name="totp" required autocomplete="one-time-code">
 
             <button type="submit">Login</button>
         </form>
