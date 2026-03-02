@@ -4,9 +4,9 @@
  *
  * @param int $currentPage Current page number
  * @param int $totalPages Total number of pages
- * @param string $endpoint The PHP file to fetch (e.g., 'notifications.php')
+ * @param string $endpoint The PHP file to fetch (e.g., 'notifications')
  */
-function render_pagination(int $currentPage, int $totalPages, string $endpoint) {
+function render_pagination(int $currentPage, int $totalPages, string $endpoint): void {
     if ($totalPages <= 1) return; // no pagination needed
     ?>
     <div class="pagination">
