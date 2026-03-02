@@ -41,11 +41,12 @@ try {
 
         // ✅ Generate QR code URL (using Google Charts API)
         $appName = 'VartaSphere';
+        // FIX: Pass array with size parameter instead of integer
         $qrCodeUrl = $ga->getQRCodeGoogleUrl(
             "{$appName} ({$user['email']})",
             $secret,
             'VartaSphere',
-            200
+            ['width' => 200, 'height' => 200]  // ✅ FIXED: Use array instead of int
         );
 
         http_response_code(200);
