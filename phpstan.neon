@@ -1,3 +1,9 @@
 parameters:
-    bootstrapFiles:
-        
+    level: 5
+    paths:
+        - app
+        - api
+        - public
+    autoload_files:
+        - %rootDir%/../resources/flash.php
+        - %rootDir%/../resources/db.php

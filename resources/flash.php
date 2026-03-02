@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/../resources/flash.php';
+
 session_start();
 
 function set_flash($message, $type = 'info') {

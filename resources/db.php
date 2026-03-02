@@ -1,5 +1,7 @@
 <?php
 /** @var mysqli $conn */
+global $conn;
+
 $host = getenv("CPANEL_DB_HOST");
 $user = getenv("CPANEL_DB_USER");
 $pass = getenv("CPANEL_DB_PASS");
