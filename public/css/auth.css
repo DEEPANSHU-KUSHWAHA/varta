@@ -96,32 +96,38 @@ body {
 
 /* Tabbed Auth */
 .auth-tabs {
-    max-width: 600px;
-    margin: 20px auto;
-    background: #f9f9f9;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    padding: 20px;
+    max-width: 500px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    padding: 30px;
 }
 .tab-header {
     display: flex;
     list-style: none;
     padding: 0;
-    margin: 0 0 20px 0;
+    margin: 0 0 30px 0;
     border-bottom: 2px solid #ddd;
 }
 .tab-header .tab-link {
     flex: 1;
     text-align: center;
-    padding: 10px;
+    padding: 12px;
     cursor: pointer;
     font-weight: bold;
-    color: #555;
-    transition: color 0.3s ease;
+    color: #666;
+    transition: all 0.3s ease;
+    border: none;
+    background: none;
+}
+.tab-header .tab-link:hover {
+    color: #0077cc;
 }
 .tab-header .tab-link.active {
-    border-bottom: 3px solid #0077cc;
     color: #0077cc;
+    border-bottom: 3px solid #0077cc;
+    margin-bottom: -2px;
 }
 .tab-content {
     display: none;
@@ -133,4 +139,55 @@ body {
 .tab-content.fade-in {
     opacity: 1;
     transform: translateY(0);
+}
+.tab-content h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+}
+.tab-content form {
+    display: flex;
+    flex-direction: column;
+}
+.tab-content label {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #444;
+}
+.tab-content input,
+.tab-content select {
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+.tab-content button {
+    margin-top: 20px;
+    padding: 12px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+.tab-content button:hover {
+    background: #555;
+}
+.tab-content p {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+}
+.tab-content a {
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+}
+.tab-content a:hover {
+    text-decoration: underline;
 }

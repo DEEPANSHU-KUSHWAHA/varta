@@ -14,10 +14,10 @@ if (!isset($_SESSION['user_id']) && !in_array($page, ['login', 'signup', 'home']
 <head>
     <meta charset="UTF-8">
     <title>Varta</title>
-    <link rel="stylesheet" href="public/css/navbar.css">
-    <link rel="stylesheet" href="public/css/sidebar.css">
-    <link rel="stylesheet" href="public/css/auth.css">
-    <link rel="stylesheet" href="public/css/home.css">
+    <link rel="stylesheet" href="/public/css/navbar.css">
+    <link rel="stylesheet" href="/public/css/sidebar.css">
+    <link rel="stylesheet" href="/public/css/auth.css">
+    <link rel="stylesheet" href="/public/css/home.css">
 </head>
 <body>
     <!-- Logo always top-left -->
@@ -66,10 +66,8 @@ if (!isset($_SESSION['user_id']) && !in_array($page, ['login', 'signup', 'home']
         <?php
         switch ($page) {
             case 'login':
-                include __DIR__ . '/public/login.php';
-                break;
             case 'signup':
-                include __DIR__ . '/public/signup.php';
+                include __DIR__ . '/public/auth.php';
                 break;
             case 'sessions':
                 include __DIR__ . '/public/sessions.php';
