@@ -1,65 +1,92 @@
 <?php
+session_start();
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../resources/db.php';
+
+header('Content-Type: application/json');
+
 /** @var mysqli $conn */
 global $conn;
-require_once __DIR__ . '/../resources/flash.php';
 
-session_start();
+try {
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $totp_code = trim($_POST['totp_code'] ?? '');
 
-$username = trim($_POST['username'] ?? '');
-$password = $_POST['password'] ?? '';
-$otp      = $_POST['totp'] ?? '';
+    // ✅ Validate inputs
+    if (empty($email) || empty($password)) {
+        throw new Exception('Email and password are required');
+    }
 
-if ($username === '' || $password === '' || $otp === '') {
-    set_flash("Username, password, and OTP are required.", "error");
-    header("Location: /public/login.php");
-    exit;
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new Exception('Invalid email format');
+    }
+
+    // ✅ Find user by email
+    $stmt = $conn->prepare("
+        SELECT id, username, password, totp_enabled, totp_secret 
+        FROM users 
+        WHERE email = ?
+    ");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        throw new Exception('Invalid email or password');
+    }
+
+    $user = $result->fetch_assoc();
+
+    // ✅ Verify password
+    if (!password_verify($password, $user['password'])) {
+        throw new Exception('Invalid email or password');
+    }
+
+    // ✅ Check if 2FA is enabled
+    if ($user['totp_enabled']) {
+        // If TOTP code not provided yet, ask for it
+        if (empty($totp_code)) {
+            http_response_code(200);
+            echo json_encode([
+                'success' => false,
+                'totp_required' => true,
+                'message' => 'Two-Factor Authentication required'
+            ]);
+            exit;
+        }
+
+        // ✅ Verify TOTP code
+        require_once __DIR__ . '/../vendor/autoload.php';
+        $ga = new PHPGangsta_GoogleAuthenticator();
+
+        if (!$ga->verifyCode($user['totp_secret'], $totp_code, 2)) {
+            throw new Exception('Invalid two-factor authentication code');
+        }
+    }
+
+    // ✅ Set session and login user
+    $_SESSION['user_id'] = $user['id'];
+    $_SESSION['username'] = $user['username'];
+    $_SESSION['email'] = $email;
+
+    // ✅ Update last login timestamp
+    $updateStmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+    $updateStmt->bind_param("i", $user['id']);
+    $updateStmt->execute();
+
+    http_response_code(200);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Login successful',
+        'user_id' => $user['id'],
+        'username' => $user['username']
+    ]);
+
+} catch (Exception $e) {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
 }
-
-$stmt = $conn->prepare("SELECT id, username, password_hash, totp_secret_enc FROM users WHERE username = ? LIMIT 1");
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
-
-/** @var array<string,mixed>|null $user */
-$user = $result->fetch_assoc();
-
-if (!$user || !password_verify($password, $user['password_hash'])) {
-    set_flash("Invalid username or password.", "error");
-    header("Location: /public/login.php");
-    exit;
-}
-
-// Decrypt TOTP secret
-$totpSecretEnc = $user['totp_secret_enc'];
-$encryptionKey = hex2bin(getenv('TOTP_ENC_KEY'));
-$iv = substr($totpSecretEnc, 0, 16);
-$ciphertext = substr($totpSecretEnc, 16);
-$secret = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
-
-if (!$secret) {
-    set_flash("TOTP secret decryption failed.", "error");
-    header("Location: /public/login.php");
-    exit;
-}
-
-$ga = new PHPGangsta_GoogleAuthenticator();
-if (!$ga->verifyCode($secret, $otp, 2)) {
-    set_flash("Invalid OTP.", "error");
-    header("Location: /public/login.php");
-    exit;
-}
-
-// ✅ Update last login timestamp
-$update = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-$update->bind_param("i", $user['id']);
-$update->execute();
-
-// ✅ Success: set session
-$_SESSION['user_id'] = $user['id'];
-$_SESSION['username'] = $user['username'];
-
-set_flash("Login successful!", "success");
-header("Location: /public/dashboard.php");
-exit;
