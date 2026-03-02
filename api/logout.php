@@ -1,18 +1,15 @@
 <?php
+session_start();
+require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../resources/db.php';
 /** @var mysqli $conn */
 global $conn;
 require_once __DIR__ . '/../resources/flash.php';
 
-session_start();
-
-// Unset all session variables
+// ✅ Clear all session data
 $_SESSION = [];
 
-// Destroy the session
-session_destroy();
-
-// Clear session cookie if set
+// ✅ Destroy the session completely
 if (ini_get("session.use_cookies")) {
     $params = session_get_cookie_params();
     setcookie(session_name(), '', time() - 42000,
@@ -20,9 +17,11 @@ if (ini_get("session.use_cookies")) {
         $params["secure"], $params["httponly"]
     );
 }
+session_destroy();
 
-// After destroying session 
-require_once __DIR__ . '/../resources/flash.php'; 
-set_flash("You have been logged out successfully.", "info"); 
-header("Location: /public/auth.php"); 
+// ✅ Flash message for feedback
+set_flash("You have been logged out successfully.", "info");
+
+// ✅ Redirect back to auth page
+header("Location: /public/auth.php");
 exit;
