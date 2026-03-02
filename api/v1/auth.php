@@ -3,6 +3,10 @@
  * Authentication API Microservice
  * Handles login, logout, token refresh, user registration
  */
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../resources/db.php';
 require_once __DIR__ . '/response.php';
@@ -65,7 +69,7 @@ function handleLogin($input, $conn) {
 
     // Verify TOTP
     $totpSecretEnc = $user['totp_secret_enc'];
-    $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?? 'default256bitkey1234567890123456');
+    $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?: 'default256bitkey1234567890123456');
     $iv = substr((string)$totpSecretEnc, 0, 16);
     $ciphertext = substr((string)$totpSecretEnc, 16);
     $secret = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
@@ -130,7 +134,7 @@ function handleRegister($input, $conn) {
     // Generate TOTP secret and store encrypted
     $ga = new PHPGangsta_GoogleAuthenticator();
     $secret = $ga->createSecret();
-    $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?? 'default256bitkey1234567890123456');
+    $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?: 'default256bitkey1234567890123456');
     $iv = openssl_random_pseudo_bytes(16);
     $encryptedSecret = $iv . openssl_encrypt($secret, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
 
@@ -169,7 +173,7 @@ function handleVerifyOtp($input, $conn) {
         exit(ApiResponse::error('User not found', 404));
     }
 
-    $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?? 'default256bitkey1234567890123456');
+    $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?: 'default256bitkey1234567890123456');
     $iv = substr((string)$user['totp_secret_enc'], 0, 16);
     $ciphertext = substr((string)$user['totp_secret_enc'], 16);
     $secret = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
@@ -198,7 +202,7 @@ function handleRefreshToken($input, $conn) {
 }
 
 function createJWTToken($userId) {
-    $secret = getenv('JWT_SECRET') ?? 'your-secret-key';
+    $secret = getenv('JWT_SECRET') ?: 'your-secret-key';
     $payload = [
         'user_id' => $userId,
         'exp' => time() + 86400,
@@ -206,7 +210,3 @@ function createJWTToken($userId) {
     ];
     return JWT::encode($payload, $secret, 'HS256');
 }
-
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
-?>
