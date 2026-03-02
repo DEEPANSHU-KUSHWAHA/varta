@@ -1,16 +1,12 @@
 <?php
+/**
+ * Varta Main Entry Point
+ * Serves the SPA application
+ */
 session_start();
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Varta</title>
-    <!-- Styles -->
-    <link rel="stylesheet" href="/public/css/navbar.css">
-    <link rel="stylesheet" href="/public/css/sidebar.css">
-    <link rel="stylesheet" href="/public/css/auth.css">
-    <link rel="stylesheet" href="/public/css/home.css">
+
+// Include the main SPA application
+include __DIR__ . '/app.php';
     <style>
         /* Spinner styles */
         #spinner {

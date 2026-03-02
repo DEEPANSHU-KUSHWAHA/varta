@@ -1,0 +1,50 @@
+# Varta SPA URL Masking
+# This file ensures all requests are routed to /app.php while keeping URL at root
+
+<IfModule mod_rewrite.c>
+    # Enable rewrite engine
+    RewriteEngine On
+
+    # Set base URL
+    RewriteBase /
+
+    # Remove trailing slashes (optional)
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.+)/$ $1 [L,R=301]
+
+    # Don't rewrite if it's a real directory
+    RewriteCond %{REQUEST_FILENAME} -d [OR]
+    # Don't rewrite if it's a real file
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    # Don't rewrite if it's a symlink
+    RewriteCond %{REQUEST_FILENAME} -l
+    RewriteRule ^ - [L]
+
+    # Route all requests to app.php
+    RewriteRule ^(.*)$ /app.php?path=$1 [QSA,L]
+</IfModule>
+
+# Security headers
+<IfModule mod_headers.c>
+    # Prevent MIME type sniffing
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS protection
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Prevent clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# Cache control for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>

@@ -3,10 +3,14 @@ body {
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #1e3c72, #2a5298);
     color: #fff;
+}
+
+#content {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 20px 0;
 }
 
 .home-container {
@@ -16,6 +20,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     width: 400px;
+    margin-top: 80px;
 }
 
 .home-container h1 {

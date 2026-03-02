@@ -91,11 +91,12 @@ require_once __DIR__ . '/../resources/flash.php';
 <!-- Tab Switcher Script -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const tabs = document.querySelectorAll('.tab-link');
+    const tabs = document.querySelectorAll('.tab-header .tab-link');
     const contents = document.querySelectorAll('.tab-content');
 
     tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
+        tab.addEventListener('click', (event) => {
+            event.preventDefault();
             const target = tab.getAttribute('data-tab');
 
             // Remove active from all
@@ -108,7 +109,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Add active to selected with animation
             tab.classList.add('active');
             const targetContent = document.getElementById(target);
-            targetContent.classList.add('active', 'fade-in');
+            if (targetContent) {
+                targetContent.classList.add('active', 'fade-in');
+            }
         });
     });
 });
