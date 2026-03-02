@@ -6,47 +6,30 @@ require_once __DIR__ . '/../resources/db.php';
 global $conn;
 require_once __DIR__ . '/../resources/flash.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login - Varta</title>
-    <link rel="stylesheet" href="css/login.css">
-    <style>
-        .flash {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .flash.info { background: #e7f3fe; color: #31708f; }
-        .flash.success { background: #dff0d8; color: #3c763d; }
-        .flash.error { background: #f2dede; color: #a94442; }
-    </style>
-</head>
-<body>
-    <div class="login-container">
-        <h2>Login</h2>
 
-        <!-- Flash message display -->
-        <?php show_flash(); ?>
+<div class="login-container">
+    <h2>Login</h2>
 
-        <form method="POST" action="/api/login.php">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" required autocomplete="username">
+    <!-- Flash message display -->
+    <?php show_flash(); ?>
 
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required autocomplete="current-password">
+    <form method="POST" action="/api/login.php">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required autocomplete="username">
 
-            <label for="otp">One-Time Password (OTP)</label>
-            <input type="text" id="otp" name="totp" required autocomplete="one-time-code">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required autocomplete="current-password">
 
-            <button type="submit">Login</button>
-        </form>
+        <label for="otp">One-Time Password (OTP)</label>
+        <input type="text" id="otp" name="totp" required autocomplete="one-time-code">
 
-        <p>Don’t have an account? <a href="signup.php">Sign up here</a></p>
-        <p><a href="reset_password.php">Forgot your password?</a></p>
-    </div>
-</body>
-</html>
+        <button type="submit">Login</button>
+    </form>
+
+    <p>Don’t have an account? 
+        <a href="#" class="nav-option" data-page="auth">Sign up here</a>
+    </p>
+    <p>
+        <a href="#" class="nav-option" data-page="reset_password">Forgot your password?</a>
+    </p>
+</div>

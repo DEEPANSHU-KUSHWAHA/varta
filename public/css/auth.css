@@ -5,9 +5,11 @@ body {
     padding: 0;
 }
 
+/* General Auth Container */
 .auth-container {
-    width: 400px;
-    margin: 60px auto;
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
     background: #fff;
     padding: 25px;
     border-radius: 8px;
@@ -69,6 +71,17 @@ body {
     text-decoration: underline;
 }
 
+/* Remember Me */
+.remember-me {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    font-size: 14px;
+}
+.remember-me input {
+    margin-right: 6px;
+}
+
 /* Flash message styles */
 .flash {
     padding: 10px;
@@ -80,41 +93,44 @@ body {
 .flash.info { background: #e7f3fe; color: #31708f; }
 .flash.success { background: #dff0d8; color: #3c763d; }
 .flash.error { background: #f2dede; color: #a94442; }
-/* Pagination container */
-.pagination {
+
+/* Tabbed Auth */
+.auth-tabs {
+    max-width: 600px;
+    margin: 20px auto;
+    background: #f9f9f9;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+}
+.tab-header {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
-    margin-top: 20px;
-    font-family: inherit;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid #ddd;
 }
-
-/* Pagination links */
-.pagination .page-link {
-    display: inline-block;
-    padding: 6px 12px;
-    background-color: #0077cc;
-    color: #fff;
-    border-radius: 4px;
-    text-decoration: none;
-    transition: background-color 0.2s ease;
-    font-size: 14px;
+.tab-header .tab-link {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    transition: color 0.3s ease;
 }
-
-.pagination .page-link:hover {
-    background-color: #005fa3;
+.tab-header .tab-link.active {
+    border-bottom: 3px solid #0077cc;
+    color: #0077cc;
 }
-
-/* Disabled state (optional) */
-.pagination .page-link.disabled {
-    background-color: #ccc;
-    color: #666;
-    pointer-events: none;
+.tab-content {
+    display: none;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
 }
-
-/* Current page indicator */
-.pagination span {
-    font-size: 14px;
-    color: #333;
+.tab-content.active { display: block; }
+.tab-content.fade-in {
+    opacity: 1;
+    transform: translateY(0);
 }
