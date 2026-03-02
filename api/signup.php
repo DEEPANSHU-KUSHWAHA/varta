@@ -53,7 +53,7 @@ try {
     $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
 
     // ✅ Prepare insert statement
-    $stmt = $conn->prepare("
+        $stmt = $conn->prepare("
         INSERT INTO users 
         (first_name, last_name, username, email, phone, password, totp_enabled, totp_secret, created_at) 
         VALUES 
@@ -64,12 +64,12 @@ try {
         throw new Exception('Database error: ' . $conn->error);
     }
 
-    // ✅ Bind parameters
+    // ✅ Bind parameters - FIX: Use proper type for nullable value
     $totp_enabled = $enable_2fa ? 1 : 0;
-    $totp_secret_value = ($enable_2fa && !empty($totp_secret)) ? $totp_secret : NULL;
+    $totp_secret_value = ($enable_2fa && !empty($totp_secret)) ? $totp_secret : null;
 
     $stmt->bind_param(
-        "ssssssss",
+        "ssssisss",
         $first_name,
         $last_name,
         $username,
@@ -79,7 +79,6 @@ try {
         $totp_enabled,
         $totp_secret_value
     );
-
     // ✅ Execute insert
     if (!$stmt->execute()) {
         throw new Exception('Error creating account: ' . $stmt->error);
