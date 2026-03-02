@@ -13,7 +13,7 @@ $otp      = $_POST['totp'] ?? '';
 
 if ($username === '' || $password === '' || $otp === '') {
     set_flash("Username, password, and OTP are required.", "error");
-    header("Location: /public/auth.php");
+    header("Location: /public/login.php");
     exit;
 }
 
@@ -21,15 +21,17 @@ $stmt = $conn->prepare("SELECT id, username, password_hash, totp_secret_enc FROM
 $stmt->bind_param("s", $username);
 $stmt->execute();
 $result = $stmt->get_result();
+
+/** @var array<string,mixed>|null $user */
 $user = $result->fetch_assoc();
 
 if (!$user || !password_verify($password, $user['password_hash'])) {
     set_flash("Invalid username or password.", "error");
-    header("Location: /public/auth.php");
+    header("Location: /public/login.php");
     exit;
 }
 
-// Decrypt secret
+// Decrypt TOTP secret
 $totpSecretEnc = $user['totp_secret_enc'];
 $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY'));
 $iv = substr($totpSecretEnc, 0, 16);
@@ -38,21 +40,26 @@ $secret = openssl_decrypt($ciphertext, 'aes-256-cbc', $encryptionKey, OPENSSL_RA
 
 if (!$secret) {
     set_flash("TOTP secret decryption failed.", "error");
-    header("Location: /public/auth.php");
+    header("Location: /public/login.php");
     exit;
 }
 
 $ga = new PHPGangsta_GoogleAuthenticator();
 if (!$ga->verifyCode($secret, $otp, 2)) {
     set_flash("Invalid OTP.", "error");
-    header("Location: /public/auth.php");
+    header("Location: /public/login.php");
     exit;
 }
 
-// Success
+// ✅ Update last login timestamp
+$update = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+$update->bind_param("i", $user['id']);
+$update->execute();
+
+// ✅ Success: set session
 $_SESSION['user_id'] = $user['id'];
 $_SESSION['username'] = $user['username'];
-set_flash("Login successful!", "success");
 
+set_flash("Login successful!", "success");
 header("Location: /public/dashboard.php");
 exit;

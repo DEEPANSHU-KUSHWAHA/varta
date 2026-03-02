@@ -59,10 +59,38 @@ if (!empty($_FILES['avatar']['name'])) {
 // ✅ Hash password securely
 $passwordHash = password_hash($password, PASSWORD_ARGON2ID);
 
-// ✅ Verify TOTP
+// ✅ Setup Google Authenticator
 $ga = new PHPGangsta_GoogleAuthenticator();
-$secret = $_SESSION['totp_secret'] ?? null;
-if (!$secret || !$ga->verifyCode($secret, $totpCode, 2)) {
+
+// If no secret yet, generate one and show QR code
+if (!isset($_SESSION['totp_secret'])) {
+    $secret = $ga->createSecret();
+    $_SESSION['totp_secret'] = $secret;
+    $qrCodeUrl = $ga->getQRCodeGoogleUrl('VartaApp', $secret);
+
+    echo "<h2>Scan this QR code with Google Authenticator</h2>";
+    echo "<img src='" . htmlspecialchars($qrCodeUrl) . "' alt='QR Code'>";
+    echo "<p>Then enter the OTP below to complete signup.</p>";
+    echo "<form method='POST' action='/api/signup.php' enctype='multipart/form-data'>
+            <input type='hidden' name='first_name' value='" . htmlspecialchars($firstName) . "'>
+            <input type='hidden' name='middle_name' value='" . htmlspecialchars($middleName) . "'>
+            <input type='hidden' name='last_name' value='" . htmlspecialchars($lastName) . "'>
+            <input type='hidden' name='phone' value='" . htmlspecialchars($phone) . "'>
+            <input type='hidden' name='email' value='" . htmlspecialchars($email) . "'>
+            <input type='hidden' name='username' value='" . htmlspecialchars($username) . "'>
+            <input type='hidden' name='password' value='" . htmlspecialchars($password) . "'>
+            <input type='hidden' name='confirm_password' value='" . htmlspecialchars($confirmPass) . "'>
+            <input type='hidden' name='role' value='" . htmlspecialchars($role) . "'>
+            <label for='totp'>OTP</label>
+            <input type='text' name='totp' required>
+            <button type='submit'>Verify & Create Account</button>
+          </form>";
+    exit;
+}
+
+// ✅ Verify TOTP
+$secret = $_SESSION['totp_secret'];
+if (!$ga->verifyCode($secret, $totpCode, 2)) {
     set_flash("Invalid OTP.", "error");
     header("Location: /public/auth.php");
     exit;
