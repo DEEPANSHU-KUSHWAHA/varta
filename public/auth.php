@@ -113,18 +113,19 @@ require_once __DIR__ . '/../resources/flash.php';
                 </p>
 
                 <!-- QR display section for signup (hidden initially) -->
-                <div id="signup-qr-section" style="display:none; text-align:center; margin-top:2rem; padding:1.5rem; background:rgba(0,212,255,0.05); border:1px solid #2a3050; border-radius:8px;">
-                    <h3 style="color:#00d4ff; margin-bottom:1rem;">Scan QR Code</h3>
-                    <p>Use an authenticator app (Google Authenticator, Authy, Microsoft Authenticator):</p>
-                    <div style="margin:1rem 0; background:white; padding:0.5rem; border-radius:4px; display:inline-block;">
-                        <img id="signup-qr-image" src="" alt="TOTP QR Code" style="max-width:180px; display:block;" />
+                <div id="signup-qr-section" style="display:none; padding:1.5rem; background:rgba(0,212,255,0.05); border:1px solid #2a3050; border-radius:8px; text-align:center;">
+                    <h3 style="color:#00d4ff; margin:0 0 1rem 0;">Scan QR Code</h3>
+                    <p style="margin-bottom:1rem;">Use an authenticator app (Google Authenticator, Authy, Microsoft Authenticator):</p>
+                    <div style="margin:1rem 0; background:white; padding:0.75rem; border-radius:4px; display:inline-block;">
+                        <img id="signup-qr-image" src="" alt="TOTP QR Code" style="max-width:200px; display:block;" />
                     </div>
-                    <p style="color:#aaa; font-size:0.9rem; margin-top:1rem;">Can't scan? Enter manually:<br/><strong style="color:#e0e0e0;" id="signup-qr-secret"></strong></p>
+                    <p style="color:#aaa; font-size:0.85rem; margin-top:1rem;">Can't scan? Enter manually:</p>
+                    <p style="color:#e0e0e0; font-family:monospace; font-weight:bold; word-break:break-all; margin:0.5rem 0;" id="signup-qr-secret"></p>
                     <div class="form-group" style="margin-top:1.5rem;">
-                        <label for="signup-verify-code">Enter 6-digit Code</label>
-                        <input type="text" id="signup-verify-code" maxlength="6" inputmode="numeric" placeholder="000000" style="text-align:center; font-size:20px; letter-spacing:8px; font-weight:bold;" />
+                        <label for="signup-verify-code" style="color:#e0e0e0;">Enter 6-digit Code from App</label>
+                        <input type="text" id="signup-verify-code" required maxlength="6" inputmode="numeric" placeholder="000000" style="text-align:center; font-size:22px; letter-spacing:10px; font-weight:bold;" />
                     </div>
-                    <button id="signup-verify-btn" class="btn btn-primary" style="margin-top:1rem;">Verify & Complete</button>
+                    <button id="signup-verify-btn" type="button" class="btn btn-primary" style="margin-top:1rem;">Verify & Complete</button>
                 </div>
             </div>
         </div>
@@ -218,14 +219,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 last_name: formData.get('last_name'),
                 phone: formData.get('phone')
             };
+            console.log('Submitting signup form with data:', data);
             try {
                 const resp = await fetch('/api/v1/auth.php?action=register', {
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
                     body: JSON.stringify(data)
                 });
+                console.log('Response status:', resp.status);
                 const text = await resp.text();
-                const result = JSON.parse(text);
+                console.log('Response text:', text.substring(0, 300));
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (parseErr) {
+                    console.error('Failed to parse JSON:', parseErr);
+                    alert('Server error - response was not JSON. Check browser console.');
+                    return;
+                }
                 if (result.success) {
                     tempUserData = result.data;
                     if (qrImage && result.data.qr_code) qrImage.src = result.data.qr_code;
@@ -237,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Registration failed: ' + result.message + (result.errors ? '\n' + JSON.stringify(result.errors) : ''));
                 }
             } catch (err) {
-                console.error(err);
+                console.error('Fetch error:', err);
                 alert('Error registering: ' + err.message);
             }
         });

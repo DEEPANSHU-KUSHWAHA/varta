@@ -4,6 +4,32 @@
  * Handles login, logout, token refresh, user registration
  */
 
+// Set JSON header and error handling immediately
+header('Content-Type: application/json; charset=utf-8');
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+
+// Catch any PHP errors and return as JSON
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    http_response_code(500);
+    exit(json_encode([
+        'success' => false,
+        'message' => 'Server error: ' . $errstr,
+        'file' => basename($errfile),
+        'line' => $errline
+    ]));
+});
+
+// Catch uncaught exceptions
+set_exception_handler(function($e) {
+    http_response_code(500);
+    exit(json_encode([
+        'success' => false,
+        'message' => 'Exception: ' . $e->getMessage(),
+        'code' => $e->getCode()
+    ]));
+});
+
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
@@ -12,14 +38,9 @@ require_once __DIR__ . '/../../resources/db.php';
 require_once __DIR__ . '/../../app/auth/jwt.php';
 require_once __DIR__ . '/response.php';
 
-header('Content-Type: application/json');
-
 $method = $_SERVER['REQUEST_METHOD'];
-$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
 session_start();
 
-// Only allow POST for auth endpoints
 if ($method !== 'POST') {
     exit(ApiResponse::error('Method not allowed', 405));
 }
@@ -29,24 +50,13 @@ $input = getJsonInput();
 
 global $conn;
 
-switch ($action) {
-    case 'login':
-        handleLogin($input, $conn);
-        break;
-    case 'logout':
-        handleLogout();
-        break;
-    case 'register':
-        handleRegister($input, $conn);
-        break;
-    case 'verify-otp':
-        handleVerifyOtp($input, $conn);
-        break;
-    case 'refresh-token':
-        handleRefreshToken($input, $conn);
-        break;
-    default:
-        exit(ApiResponse::error('Unknown action', 400));
+function logError($action, $data) {
+    $logFile = __DIR__ . '/../../uploads/auth_errors.log';
+    $timestamp = date('Y-m-d H:i:s');
+    $logEntry = "[$timestamp] Action: $action\n";
+    $logEntry .= "Data: " . json_encode($data) . "\n";
+    $logEntry .= "---\n";
+    @file_put_contents($logFile, $logEntry, FILE_APPEND);
 }
 
 function handleLogin($input, $conn) {
@@ -68,7 +78,6 @@ function handleLogin($input, $conn) {
         exit(ApiResponse::error('Invalid credentials', 401));
     }
 
-    // Verify TOTP
     $totpSecretEnc = $user['totp_secret_enc'];
     $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?: 'default256bitkey1234567890123456');
     $iv = substr((string)$totpSecretEnc, 0, 16);
@@ -84,12 +93,10 @@ function handleLogin($input, $conn) {
         exit(ApiResponse::error('Invalid OTP', 401));
     }
 
-    // Update last login
     $update = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
     $update->bind_param("i", $user['id']);
     $update->execute();
 
-    // Create JWT token
     $jwtToken = createJWTToken($user['id']);
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['username'] = $user['username'];
@@ -107,62 +114,81 @@ function handleLogout() {
 }
 
 function handleRegister($input, $conn) {
+    logError('register_attempt', $input);
+
     $username = sanitize($input['username'] ?? '');
     $email = sanitize($input['email'] ?? '');
     $password = $input['password'] ?? '';
     $confirmPass = $input['confirm_password'] ?? '';
     $firstName = sanitize($input['first_name'] ?? '');
 
-    // Detailed validation
     $errors = [];
     if (empty($username)) $errors[] = 'username is required';
     if (empty($email)) $errors[] = 'email is required';
     if (empty($password)) $errors[] = 'password is required';
     if (empty($firstName)) $errors[] = 'first_name is required';
     if (!empty($password) && $password !== $confirmPass) $errors[] = 'passwords do not match';
-    
+
     if (!empty($errors)) {
+        logError('register_validation_failed', $errors);
         exit(ApiResponse::error('Validation failed: ' . implode(', ', $errors), 400, $errors));
     }
 
-    // Check if username exists
-    $check = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1");
-    $check->bind_param("ss", $username, $email);
-    $check->execute();
-    if ($check->get_result()->num_rows > 0) {
-        exit(ApiResponse::error('Username or email already exists', 409));
+    try {
+        $check = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ? LIMIT 1");
+        if (!$check) {
+            logError('register_prepare_error', ['error' => $conn->error]);
+            exit(ApiResponse::error('Database error', 500));
+        }
+
+        $check->bind_param("ss", $username, $email);
+        $check->execute();
+        if ($check->get_result()->num_rows > 0) {
+            logError('register_duplicate', ['username' => $username, 'email' => $email]);
+            exit(ApiResponse::error('Username or email already exists', 409));
+        }
+    } catch (Exception $e) {
+        logError('register_check_error', ['exception' => $e->getMessage()]);
+        exit(ApiResponse::error('Database error: ' . $e->getMessage(), 500));
     }
 
-    // Hash password
     $passwordHash = password_hash($password, PASSWORD_ARGON2ID);
 
-    // Generate TOTP secret and store encrypted
-    $ga = new PHPGangsta_GoogleAuthenticator();
-    $secret = $ga->createSecret();
-    $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?: 'default256bitkey1234567890123456');
-    $iv = openssl_random_pseudo_bytes(16);
-    $encryptedSecret = $iv . openssl_encrypt($secret, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
+    try {
+        $ga = new PHPGangsta_GoogleAuthenticator();
+        $secret = $ga->createSecret();
+        $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?: 'default256bitkey1234567890123456');
+        $iv = openssl_random_pseudo_bytes(16);
+        $encryptedSecret = $iv . openssl_encrypt($secret, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv);
 
-    // Insert user
-    $insert = $conn->prepare("INSERT INTO users (username, email, password_hash, first_name, totp_secret_enc) VALUES (?, ?, ?, ?, ?)");
-    $insert->bind_param("sssss", $username, $email, $passwordHash, $firstName, $encryptedSecret);
+        $insert = $conn->prepare("INSERT INTO users (username, email, password_hash, first_name, totp_secret_enc) VALUES (?, ?, ?, ?, ?)");
+        if (!$insert) {
+            logError('register_insert_prepare_error', ['error' => $conn->error]);
+            exit(ApiResponse::error('Database error', 500));
+        }
 
-    if (!$insert->execute()) {
-        exit(ApiResponse::error('Registration failed', 500));
+        $insert->bind_param("sssss", $username, $email, $passwordHash, $firstName, $encryptedSecret);
+        if (!$insert->execute()) {
+            logError('register_insert_execute_error', ['error' => $insert->error]);
+            exit(ApiResponse::error('Registration failed: ' . $insert->error, 500));
+        }
+
+        $qrCodeUrl = $ga->getQRCodeGoogleUrl('Varta:' . $email, $secret, 'Varta');
+        logError('register_success', ['user_id' => $insert->insert_id, 'username' => $username]);
+
+        exit(ApiResponse::success([
+            'user_id' => $insert->insert_id,
+            'qr_code' => $qrCodeUrl,
+            'secret' => $secret,
+            'message' => 'Scan the QR code to enable 2FA'
+        ], 'Registration successful', 201));
+    } catch (Exception $e) {
+        logError('register_exception', ['exception' => $e->getMessage()]);
+        exit(ApiResponse::error('Server error: ' . $e->getMessage(), 500));
     }
-
-    $qrCodeUrl = $ga->getQRCodeGoogleUrl('Varta:' . $email, $secret, 'Varta');
-
-    exit(ApiResponse::success([
-        'user_id' => $insert->insert_id,
-        'qr_code' => $qrCodeUrl,
-        'secret' => $secret,
-        'message' => 'Scan the QR code to enable 2FA'
-    ], 'Registration successful', 201));
 }
 
 function handleVerifyOtp($input, $conn) {
-    // allow either authenticated user or pass user_id after registration
     $userId = null;
     if (!empty($_SESSION['user_id'])) {
         $userId = $_SESSION['user_id'];
@@ -175,7 +201,6 @@ function handleVerifyOtp($input, $conn) {
     }
 
     $otp = sanitize($input['totp'] ?? $input['code'] ?? '');
-
     if (empty($otp)) {
         exit(ApiResponse::error('OTP is required', 400));
     }
@@ -199,10 +224,9 @@ function handleVerifyOtp($input, $conn) {
         exit(ApiResponse::error('Invalid OTP', 401));
     }
 
-    // generate token and log in
     $jwtToken = createJWTToken($userId);
     $_SESSION['user_id'] = $userId;
-    
+
     exit(ApiResponse::success([
         'token' => $jwtToken,
         'user_id' => $userId
@@ -223,3 +247,24 @@ function handleRefreshToken($input, $conn) {
         exit(ApiResponse::error('Invalid token', 401));
     }
 }
+
+switch ($action) {
+    case 'login':
+        handleLogin($input, $conn);
+        break;
+    case 'logout':
+        handleLogout();
+        break;
+    case 'register':
+        handleRegister($input, $conn);
+        break;
+    case 'verify-otp':
+        handleVerifyOtp($input, $conn);
+        break;
+    case 'refresh-token':
+        handleRefreshToken($input, $conn);
+        break;
+    default:
+        exit(ApiResponse::error('Unknown action: ' . $action, 400));
+}
+
