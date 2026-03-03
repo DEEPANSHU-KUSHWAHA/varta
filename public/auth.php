@@ -73,7 +73,7 @@ require_once __DIR__ . '/../resources/flash.php';
 
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" id="email" name="email" placeholder="Email address">
+                        <input type="email" id="email" name="email" required placeholder="Email address">
                     </div>
 
                     <div class="form-group">
@@ -113,15 +113,18 @@ require_once __DIR__ . '/../resources/flash.php';
                 </p>
 
                 <!-- QR display section for signup (hidden initially) -->
-                <div id="signup-qr-section" style="display:none; text-align:center; margin-top:1rem;">
-                    <p>Scan the QR code with your authenticator app:</p>
-                    <img id="signup-qr-image" src="" alt="TOTP QR Code" style="max-width:180px; margin:10px auto; display:block;" />
-                    <p style="color:#aaa; font-size:0.9rem;">Secret: <span id="signup-qr-secret"></span></p>
-                    <div class="form-group" style="margin-top:1rem;">
-                        <label for="signup-verify-code">Enter Code</label>
-                        <input type="text" id="signup-verify-code" maxlength="6" inputmode="numeric" placeholder="000000" style="text-align:center; font-size:18px; letter-spacing:4px;" />
+                <div id="signup-qr-section" style="display:none; text-align:center; margin-top:2rem; padding:1.5rem; background:rgba(0,212,255,0.05); border:1px solid #2a3050; border-radius:8px;">
+                    <h3 style="color:#00d4ff; margin-bottom:1rem;">Scan QR Code</h3>
+                    <p>Use an authenticator app (Google Authenticator, Authy, Microsoft Authenticator):</p>
+                    <div style="margin:1rem 0; background:white; padding:0.5rem; border-radius:4px; display:inline-block;">
+                        <img id="signup-qr-image" src="" alt="TOTP QR Code" style="max-width:180px; display:block;" />
                     </div>
-                    <button id="signup-verify-btn" class="btn btn-primary">Verify & Complete</button>
+                    <p style="color:#aaa; font-size:0.9rem; margin-top:1rem;">Can't scan? Enter manually:<br/><strong style="color:#e0e0e0;" id="signup-qr-secret"></strong></p>
+                    <div class="form-group" style="margin-top:1.5rem;">
+                        <label for="signup-verify-code">Enter 6-digit Code</label>
+                        <input type="text" id="signup-verify-code" maxlength="6" inputmode="numeric" placeholder="000000" style="text-align:center; font-size:20px; letter-spacing:8px; font-weight:bold;" />
+                    </div>
+                    <button id="signup-verify-btn" class="btn btn-primary" style="margin-top:1rem;">Verify & Complete</button>
                 </div>
             </div>
         </div>
@@ -230,7 +233,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     signupForm.style.display = 'none';
                     if (qrSection) qrSection.style.display = 'block';
                 } else {
-                    alert('Registration failed: ' + result.message);
+                    console.error('Registration error:', result);
+                    alert('Registration failed: ' + result.message + (result.errors ? '\n' + JSON.stringify(result.errors) : ''));
                 }
             } catch (err) {
                 console.error(err);

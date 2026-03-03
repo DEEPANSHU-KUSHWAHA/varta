@@ -113,12 +113,16 @@ function handleRegister($input, $conn) {
     $confirmPass = $input['confirm_password'] ?? '';
     $firstName = sanitize($input['first_name'] ?? '');
 
-    if (empty($username) || empty($email) || empty($password) || empty($firstName)) {
-        exit(ApiResponse::error('Missing required fields', 400));
-    }
-
-    if ($password !== $confirmPass) {
-        exit(ApiResponse::error('Passwords do not match', 400));
+    // Detailed validation
+    $errors = [];
+    if (empty($username)) $errors[] = 'username is required';
+    if (empty($email)) $errors[] = 'email is required';
+    if (empty($password)) $errors[] = 'password is required';
+    if (empty($firstName)) $errors[] = 'first_name is required';
+    if (!empty($password) && $password !== $confirmPass) $errors[] = 'passwords do not match';
+    
+    if (!empty($errors)) {
+        exit(ApiResponse::error('Validation failed: ' . implode(', ', $errors), 400, $errors));
     }
 
     // Check if username exists
