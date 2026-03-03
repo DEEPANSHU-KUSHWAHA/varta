@@ -83,6 +83,7 @@ class AuthManager {
                 // Login successful
                 this.handleLoginSuccess(response.data);
             } catch (error) {
+                console.error('Login error:', error);
                 this.showError('Login failed: ' + error.message);
             } finally {
                 this.hideLoading('login-form');
@@ -154,6 +155,7 @@ class AuthManager {
                 form.style.display = 'none';
                 if (qrSection) qrSection.style.display = 'block';
             } catch (error) {
+                console.error('Signup error:', error);
                 this.showError('Signup failed: ' + error.message);
             } finally {
                 this.hideLoading('signup-form');

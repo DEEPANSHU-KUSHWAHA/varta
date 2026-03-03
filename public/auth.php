@@ -221,7 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {'Content-Type':'application/json'},
                     body: JSON.stringify(data)
                 });
-                const result = await resp.json();
+                const text = await resp.text();
+                const result = JSON.parse(text);
                 if (result.success) {
                     tempUserData = result.data;
                     if (qrImage && result.data.qr_code) qrImage.src = result.data.qr_code;

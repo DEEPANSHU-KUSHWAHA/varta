@@ -9,7 +9,7 @@ header('Content-Type: application/json');
 class ApiResponse {
     public static function success($data = null, $message = "Success", $statusCode = 200) {
         http_response_code($statusCode);
-        return json_encode([
+        echo json_encode([
             'success' => true,
             'message' => $message,
             'data' => $data,
@@ -19,7 +19,7 @@ class ApiResponse {
 
     public static function error($message = "Error", $statusCode = 400, $errors = null) {
         http_response_code($statusCode);
-        return json_encode([
+        echo json_encode([
             'success' => false,
             'message' => $message,
             'errors' => $errors,
@@ -29,7 +29,7 @@ class ApiResponse {
 
     public static function paginated($items, $total, $page, $limit, $message = "Success") {
         http_response_code(200);
-        return json_encode([
+        echo json_encode([
             'success' => true,
             'message' => $message,
             'data' => $items,

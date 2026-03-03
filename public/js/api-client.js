@@ -46,7 +46,19 @@ class ApiClient {
 
         try {
             const response = await fetch(url.toString(), fetchOptions);
-            const data = await response.json();
+            const text = await response.text();
+            
+            if (!text) {
+                throw new Error('Empty response from server');
+            }
+            
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (parseError) {
+                console.error('JSON parse error. Response:', text.substring(0, 300));
+                throw new Error('Invalid JSON response from server: ' + parseError.message);
+            }
 
             // Handle authentication errors
             if (response.status === 401) {
