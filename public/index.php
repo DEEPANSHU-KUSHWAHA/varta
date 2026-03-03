@@ -10,7 +10,7 @@ require_once __DIR__ . '/../resources/db.php';
 global $conn;
 
 // If database not connected, show error
-if (!$conn || $conn === null) {
+if (!$conn) {
     http_response_code(503);
     die('
     <!DOCTYPE html>
@@ -46,7 +46,7 @@ if (!$conn || $conn === null) {
             <p class="status">Database Connection Failed</p>
             <p>The application cannot connect to the database.</p>
             <p>Please check your database configuration in <code>.env</code></p>
-            <p style="font-size: 12px; color: #999;">Error: ' . htmlspecialchars($conn ? 'Connection OK' : 'No Connection') . '</p>
+            <p style="font-size: 12px; color: #999;">Error: No Connection</p>
         </div>
     </body>
     </html>
