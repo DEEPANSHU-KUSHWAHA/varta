@@ -20,7 +20,7 @@ require_once __DIR__ . '/../resources/flash.php';
             <div id="login" class="tab-content active">
                 <h2>Login</h2>
                 <?php show_flash(); ?>
-                <form method="POST" action="/api/login.php">
+                <form id="login-form" method="POST" action="/api/login.php">
                     <div class="form-group">
                         <label for="login_username">Username</label>
                         <input type="text" id="login_username" name="username" required autocomplete="username" placeholder="Username or email">
@@ -50,7 +50,7 @@ require_once __DIR__ . '/../resources/flash.php';
             <!-- Signup Tab -->
             <div id="signup" class="tab-content">
                 <h2>Sign Up</h2>
-                <form method="POST" action="/api/signup.php" enctype="multipart/form-data">
+                <form id="signup-form" method="POST" action="/api/signup.php" enctype="multipart/form-data">
                     <div class="form-group">
                         <label for="first_name">First Name</label>
                         <input type="text" id="first_name" name="first_name" required placeholder="First name">
@@ -105,16 +105,24 @@ require_once __DIR__ . '/../resources/flash.php';
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="signup_otp">One-Time Password (OTP)</label>
-                        <input type="text" id="signup_otp" name="totp" required autocomplete="one-time-code" placeholder="6‑digit code">
-                    </div>
 
                     <button type="submit" class="btn btn-primary">Sign Up</button>
                 </form>
                 <p>Already have an account? 
                     <a href="#" class="tab-link" data-tab="login">Login here</a>
                 </p>
+
+                <!-- QR display section for signup (hidden initially) -->
+                <div id="signup-qr-section" style="display:none; text-align:center; margin-top:1rem;">
+                    <p>Scan the QR code with your authenticator app:</p>
+                    <img id="signup-qr-image" src="" alt="TOTP QR Code" style="max-width:180px; margin:10px auto; display:block;" />
+                    <p style="color:#aaa; font-size:0.9rem;">Secret: <span id="signup-qr-secret"></span></p>
+                    <div class="form-group" style="margin-top:1rem;">
+                        <label for="signup-verify-code">Enter Code</label>
+                        <input type="text" id="signup-verify-code" maxlength="6" inputmode="numeric" placeholder="000000" style="text-align:center; font-size:18px; letter-spacing:4px;" />
+                    </div>
+                    <button id="signup-verify-btn" class="btn btn-primary">Verify & Complete</button>
+                </div>
             </div>
         </div>
     </div>
@@ -145,6 +153,117 @@ document.addEventListener('DOMContentLoaded', () => {
                 targetContent.classList.add('active', 'fade-in');
             }
         });
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // === LOGIN AJAX ===
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login_username').value;
+            const password = document.getElementById('login_password').value;
+            const totp = document.getElementById('login_otp').value;
+            if (!username || !password || !totp) {
+                alert('Please fill in all fields.');
+                return;
+            }
+            try {
+                const resp = await fetch('/api/v1/auth.php?action=login', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({username,password,totp})
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    if (result.data && result.data.token) {
+                        localStorage.setItem('token', result.data.token);
+                    }
+                    alert('Login successful');
+                    window.location.href = '/dashboard.php';
+                } else {
+                    alert('Login failed: ' + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error logging in');
+            }
+        });
+    }
+
+    // === SIGNUP AJAX + QR ===
+    const signupForm = document.getElementById('signup-form');
+    const qrSection = document.getElementById('signup-qr-section');
+    const qrImage = document.getElementById('signup-qr-image');
+    const qrSecret = document.getElementById('signup-qr-secret');
+    let tempUserData = null;
+
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(signupForm);
+            const data = {
+                action: 'register',
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                confirm_password: formData.get('confirm_password'),
+                first_name: formData.get('first_name'),
+                last_name: formData.get('last_name'),
+                phone: formData.get('phone')
+            };
+            try {
+                const resp = await fetch('/api/v1/auth.php?action=register', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify(data)
+                });
+                const result = await resp.json();
+                if (result.success) {
+                    tempUserData = result.data;
+                    if (qrImage && result.data.qr_code) qrImage.src = result.data.qr_code;
+                    if (qrSecret && result.data.secret) qrSecret.textContent = result.data.secret;
+                    signupForm.style.display = 'none';
+                    if (qrSection) qrSection.style.display = 'block';
+                } else {
+                    alert('Registration failed: ' + result.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error registering: ' + err.message);
+            }
+        });
+    }
+
+    document.getElementById('signup-verify-btn')?.addEventListener('click', async () => {
+        const code = document.getElementById('signup-verify-code')?.value;
+        if (!code || code.length !== 6) {
+            alert('Please enter a valid 6-digit code');
+            return;
+        }
+        try {
+            const resp = await fetch('/api/v1/auth.php?action=verify-otp', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ user_id: tempUserData?.user_id, code })
+            });
+            const result = await resp.json();
+            if (result.success) {
+                alert('Account verified! Logging you in...');
+                if (result.data && result.data.token) {
+                    localStorage.setItem('token', result.data.token);
+                }
+                window.location.href = '/dashboard.php';
+            } else {
+                alert('Verification failed: ' + result.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Verification error: ' + err.message);
+        }
     });
 });
 </script>
