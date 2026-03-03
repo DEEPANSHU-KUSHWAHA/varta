@@ -97,27 +97,31 @@ class ApiClient {
 
     // ================== AUTH ENDPOINTS ==================
 
-    async login(username, password) {
+    async login(username, password, totp) {
         return this.request('auth', {
             method: 'POST',
             params: { action: 'login' },
-            body: { username, password }
+            body: { username, password, totp }
         });
     }
 
-    async signup(username, email, password) {
+    async signup(username, email, password, firstName = '', lastName = '', phone = '') {
         return this.request('auth', {
             method: 'POST',
             params: { action: 'register' },
-            body: { username, email, password }
+            body: { username, email, password, first_name: firstName, last_name: lastName, phone }
         });
     }
 
-    async verifyOTP(code) {
+    async verifyOTP(code, userId = null) {
+        const body = { code };
+        if (userId) {
+            body.user_id = userId;
+        }
         return this.request('auth', {
             method: 'POST',
             params: { action: 'verify-otp' },
-            body: { code }
+            body
         });
     }
 

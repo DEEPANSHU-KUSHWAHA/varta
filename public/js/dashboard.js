@@ -88,7 +88,8 @@ function checkTOTPStatus() {
             const statusDiv = document.getElementById('totp-status');
             const setupDiv = document.getElementById('totp-setup');
             
-            if (data.totp_enabled) {
+            if (data.totp_enabled) // data comes from /api/v1/auth.php or status call
+            {
                 statusDiv.innerHTML = `
                     <div style="text-align: center; color: var(--success);">
                         <i class="fas fa-check-circle" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>

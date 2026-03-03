@@ -75,11 +75,15 @@ try {
             throw new Exception('Invalid TOTP code. Please try again.');
         }
 
-        // ✅ Save to database
-        $stmt = $conn->prepare("
-            UPDATE users SET totp_enabled = 1, totp_secret = ? WHERE id = ?
-        ");
-        $stmt->bind_param("si", $secret, $userId);
+        // ✅ Save encrypted secret to database
+        $encryptionKey = hex2bin(getenv('TOTP_ENC_KEY') ?: 'default256bitkey1234567890123456');
+        $iv2 = openssl_random_pseudo_bytes(16);
+        $encrypted2 = $iv2 . openssl_encrypt($secret, 'aes-256-cbc', $encryptionKey, OPENSSL_RAW_DATA, $iv2);
+        
+        $stmt = $conn->prepare(
+            "UPDATE users SET totp_secret_enc = ? WHERE id = ?"
+        );
+        $stmt->bind_param("si", $encrypted2, $userId);
         $stmt->execute();
 
         // ✅ Clear temporary session
@@ -111,10 +115,10 @@ try {
             throw new Exception('Invalid password');
         }
 
-        // Disable TOTP
-        $stmt = $conn->prepare("
-            UPDATE users SET totp_enabled = 0, totp_secret = NULL WHERE id = ?
-        ");
+        // Disable TOTP by clearing encrypted secret
+        $stmt = $conn->prepare(
+            "UPDATE users SET totp_secret_enc = NULL WHERE id = ?"
+        );
         $stmt->bind_param("i", $userId);
         $stmt->execute();
 
@@ -129,16 +133,17 @@ try {
         ]);
 
     } elseif ($action === 'status') {
-        // ✅ Get TOTP status
-        $stmt = $conn->prepare("SELECT totp_enabled FROM users WHERE id = ?");
+        // ✅ Get TOTP status (check if encrypted secret exists)
+        $stmt = $conn->prepare("SELECT totp_secret_enc FROM users WHERE id = ?");
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $user = $stmt->get_result()->fetch_assoc();
 
+        $enabled = !empty($user['totp_secret_enc']);
         http_response_code(200);
         echo json_encode([
             'success' => true,
-            'totp_enabled' => (bool)$user['totp_enabled']
+            'totp_enabled' => $enabled
         ]);
     }
 

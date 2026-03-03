@@ -1,110 +1,35 @@
 <?php
-
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../resources/db.php';
-
+// Legacy signup endpoint – proxy to v1
 header('Content-Type: application/json');
 
-/** @var mysqli $conn */
-global $conn;
+$payload = [
+    'username' => $_POST['username'] ?? '',
+    'email' => $_POST['email'] ?? '',
+    'password' => $_POST['password'] ?? '',
+    'confirm_password' => $_POST['password_confirm'] ?? '',
+    'first_name' => $_POST['first_name'] ?? '',
+    'last_name' => $_POST['last_name'] ?? '',
+    'phone' => $_POST['phone'] ?? ''
+];
 
-try {
-    // ✅ Get form data
-    $first_name = trim($_POST['first_name'] ?? '');
-    $last_name = trim($_POST['last_name'] ?? '');
-    $username = trim($_POST['username'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $phone = trim($_POST['phone'] ?? '');
-    $password = $_POST['password'] ?? '';
-    $password_confirm = $_POST['password_confirm'] ?? '';
-    $enable_2fa = intval($_POST['enable_2fa'] ?? 0);
-    $totp_secret = trim($_POST['totp_secret'] ?? '');
+$ch = curl_init();
+$apiUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http")
+        . "://" . $_SERVER['HTTP_HOST'] . "/api/v1/auth.php?action=register";
 
-    // ✅ Validate required fields
-    if (empty($first_name) || empty($username) || empty($email) || empty($password)) {
-        throw new Exception('Please fill in all required fields');
-    }
+curl_setopt($ch, CURLOPT_URL, $apiUrl);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
-    // ✅ Validate email format
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new Exception('Invalid email format');
-    }
+$response = curl_exec($ch);
+$err = curl_error($ch);
+curl_close($ch);
 
-    // ✅ Validate passwords match
-    if ($password !== $password_confirm) {
-        throw new Exception('Passwords do not match');
-    }
-
-    // ✅ Validate password strength
-    if (strlen($password) < 8) {
-        throw new Exception('Password must be at least 8 characters long');
-    }
-
-    // ✅ Check if email already exists
-    $checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ? OR username = ?");
-    $checkStmt->bind_param("ss", $email, $username);
-    $checkStmt->execute();
-    
-    if ($checkStmt->get_result()->num_rows > 0) {
-        throw new Exception('Email or username already registered');
-    }
-
-    // ✅ Hash password
-    $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-
-    // ✅ Prepare insert statement
-        $stmt = $conn->prepare("
-        INSERT INTO users 
-        (first_name, last_name, username, email, phone, password, totp_enabled, totp_secret, created_at) 
-        VALUES 
-        (?, ?, ?, ?, ?, ?, ?, ?, NOW())
-    ");
-
-    if (!$stmt) {
-        throw new Exception('Database error: ' . $conn->error);
-    }
-
-    // ✅ Bind parameters - FIX: Use proper type for nullable value
-    $totp_enabled = $enable_2fa ? 1 : 0;
-    $totp_secret_value = ($enable_2fa && !empty($totp_secret)) ? $totp_secret : null;
-
-    $stmt->bind_param(
-        "ssssisss",
-        $first_name,
-        $last_name,
-        $username,
-        $email,
-        $phone,
-        $hashedPassword,
-        $totp_enabled,
-        $totp_secret_value
-    );
-    // ✅ Execute insert
-    if (!$stmt->execute()) {
-        throw new Exception('Error creating account: ' . $stmt->error);
-    }
-
-    $userId = $conn->insert_id;
-
-    // ✅ If 2FA enabled, verify the TOTP code was valid during signup
-    if ($enable_2fa && !empty($totp_secret)) {
-        $ga = new PHPGangsta_GoogleAuthenticator();
-        // Secret is already saved, will be verified during login
-    }
-
-    http_response_code(201);
-    echo json_encode([
-        'success' => true,
-        'message' => 'Account created successfully. Please log in.',
-        'user_id' => $userId,
-        'username' => $username
-    ]);
-
-} catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+if ($err) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Internal request failed']);
+} else {
+    echo $response;
 }
-?>
+

@@ -1,10 +1,10 @@
 <?php
 require_once __DIR__ . '/../resources/db.php';
+require_once __DIR__ . '/../resources/flash.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
 /** @var mysqli $conn */
 global $conn;
-require_once __DIR__ . '/../resources/flash.php';
-
-require '../resources/db.php';
 require '../vendor/autoload.php';
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;

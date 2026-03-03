@@ -1,7 +1,7 @@
 <?php
-
 /**
- * Users API Microservice - FIXED
+ * Users API Microservice
+ * Handles user profile, contacts, and user search operations
  */
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../resources/db.php';

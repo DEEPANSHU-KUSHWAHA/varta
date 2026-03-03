@@ -1,10 +1,9 @@
 <?php
 require_once __DIR__ . '/../resources/db.php';
-/** @var mysqli $conn */
-global $conn;
 require_once __DIR__ . '/../resources/flash.php';
 
-require '../resources/db.php';
+/** @var mysqli $conn */
+global $conn;
 
 $userId = $_GET['user_id'] ?? null;
 

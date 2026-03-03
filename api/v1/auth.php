@@ -9,6 +9,7 @@ use Firebase\JWT\Key;
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../resources/db.php';
+require_once __DIR__ . '/../../app/auth/jwt.php';
 require_once __DIR__ . '/response.php';
 
 header('Content-Type: application/json');
@@ -157,8 +158,19 @@ function handleRegister($input, $conn) {
 }
 
 function handleVerifyOtp($input, $conn) {
-    $userId = requireAuth();
-    $otp = sanitize($input['totp'] ?? '');
+    // allow either authenticated user or pass user_id after registration
+    $userId = null;
+    if (!empty($_SESSION['user_id'])) {
+        $userId = $_SESSION['user_id'];
+    } elseif (!empty($input['user_id'])) {
+        $userId = intval($input['user_id']);
+    }
+
+    if (!$userId) {
+        exit(ApiResponse::error('Not authenticated', 401));
+    }
+
+    $otp = sanitize($input['totp'] ?? $input['code'] ?? '');
 
     if (empty($otp)) {
         exit(ApiResponse::error('OTP is required', 400));
@@ -183,7 +195,14 @@ function handleVerifyOtp($input, $conn) {
         exit(ApiResponse::error('Invalid OTP', 401));
     }
 
-    exit(ApiResponse::success(null, 'OTP verified'));
+    // generate token and log in
+    $jwtToken = createJWTToken($userId);
+    $_SESSION['user_id'] = $userId;
+    
+    exit(ApiResponse::success([
+        'token' => $jwtToken,
+        'user_id' => $userId
+    ], 'OTP verified and user logged in'));
 }
 
 function handleRefreshToken($input, $conn) {
@@ -199,14 +218,4 @@ function handleRefreshToken($input, $conn) {
     } catch (Exception $e) {
         exit(ApiResponse::error('Invalid token', 401));
     }
-}
-
-function createJWTToken($userId) {
-    $secret = getenv('JWT_SECRET') ?: 'your-secret-key';
-    $payload = [
-        'user_id' => $userId,
-        'exp' => time() + 86400,
-        'iat' => time()
-    ];
-    return JWT::encode($payload, $secret, 'HS256');
 }

@@ -1,92 +1,34 @@
 <?php
-session_start();
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../resources/db.php';
-
+// Legacy login endpoint – forwards request to v1 microservice
 header('Content-Type: application/json');
 
-/** @var mysqli $conn */
-global $conn;
+// Build request payload using incoming POST data
+$payload = [
+    'username' => $_POST['email'] ?? $_POST['username'] ?? '',
+    'password' => $_POST['password'] ?? '',
+    'totp' => $_POST['totp_code'] ?? ''
+];
 
-try {
-    $email = trim($_POST['email'] ?? '');
-    $password = trim($_POST['password'] ?? '');
-    $totp_code = trim($_POST['totp_code'] ?? '');
+// call internal API
+$ch = curl_init();
+$apiUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http")
+        . "://" . $_SERVER['HTTP_HOST'] . "/api/v1/auth.php?action=login";
 
-    // ✅ Validate inputs
-    if (empty($email) || empty($password)) {
-        throw new Exception('Email and password are required');
-    }
+curl_setopt($ch, CURLOPT_URL, $apiUrl);
+curl_setopt($ch, CURLOPT_POST, true);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        throw new Exception('Invalid email format');
-    }
+$response = curl_exec($ch);
+$err = curl_error($ch);
+curl_close($ch);
 
-    // ✅ Find user by email
-    $stmt = $conn->prepare("
-        SELECT id, username, password, totp_enabled, totp_secret 
-        FROM users 
-        WHERE email = ?
-    ");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    if ($result->num_rows === 0) {
-        throw new Exception('Invalid email or password');
-    }
-
-    $user = $result->fetch_assoc();
-
-    // ✅ Verify password
-    if (!password_verify($password, $user['password'])) {
-        throw new Exception('Invalid email or password');
-    }
-
-    // ✅ Check if 2FA is enabled
-    if ($user['totp_enabled']) {
-        // If TOTP code not provided yet, ask for it
-        if (empty($totp_code)) {
-            http_response_code(200);
-            echo json_encode([
-                'success' => false,
-                'totp_required' => true,
-                'message' => 'Two-Factor Authentication required'
-            ]);
-            exit;
-        }
-
-        // ✅ Verify TOTP code
-        require_once __DIR__ . '/../vendor/autoload.php';
-        $ga = new PHPGangsta_GoogleAuthenticator();
-
-        if (!$ga->verifyCode($user['totp_secret'], $totp_code, 2)) {
-            throw new Exception('Invalid two-factor authentication code');
-        }
-    }
-
-    // ✅ Set session and login user
-    $_SESSION['user_id'] = $user['id'];
-    $_SESSION['username'] = $user['username'];
-    $_SESSION['email'] = $email;
-
-    // ✅ Update last login timestamp
-    $updateStmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-    $updateStmt->bind_param("i", $user['id']);
-    $updateStmt->execute();
-
-    http_response_code(200);
-    echo json_encode([
-        'success' => true,
-        'message' => 'Login successful',
-        'user_id' => $user['id'],
-        'username' => $user['username']
-    ]);
-
-} catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+if ($err) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Internal request failed']);
+} else {
+    // simply echo what v1 responded
+    echo $response;
 }
+

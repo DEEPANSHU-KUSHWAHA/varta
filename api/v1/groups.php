@@ -1,6 +1,7 @@
 <?php
 /**
- * Users API Microservice - FIXED
+ * Groups API Microservice
+ * Handles group creation, member management, and group operations
  */
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../resources/db.php';

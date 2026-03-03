@@ -73,6 +73,19 @@ $isAuthenticated = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
                         />
                     </div>
 
+                    <div class="form-group">
+                        <label for="login-totp">Authentication Code</label>
+                        <input
+                            type="text"
+                            id="login-totp"
+                            name="totp"
+                            required
+                            placeholder="6-digit code"
+                            maxlength="6"
+                            inputmode="numeric"
+                        />
+                    </div>
+
                     <button type="submit" class="btn btn-primary w-100" style="margin-bottom: 16px;">
                         Login
                     </button>
@@ -111,6 +124,40 @@ $isAuthenticated = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
                     </div>
 
                     <div class="form-group">
+                        <label for="signup-firstname">First Name</label>
+                        <input
+                            type="text"
+                            id="signup-firstname"
+                            name="first_name"
+                            required
+                            placeholder="Your first name"
+                            autocomplete="given-name"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-lastname">Last Name</label>
+                        <input
+                            type="text"
+                            id="signup-lastname"
+                            name="last_name"
+                            placeholder="Your last name"
+                            autocomplete="family-name"
+                        />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="signup-phone">Phone</label>
+                        <input
+                            type="tel"
+                            id="signup-phone"
+                            name="phone"
+                            placeholder="Optional phone number"
+                            autocomplete="tel"
+                        />
+                    </div>
+
+                    <div class="form-group">
                         <label for="signup-password">Password</label>
                         <input 
                             type="password" 
@@ -138,6 +185,18 @@ $isAuthenticated = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
                         Create Account
                     </button>
                 </form>
+
+                <!-- QR and verification section (hidden initially) -->
+                <div id="signup-qr-section" style="display: none; text-align: center; margin-top: 20px;">
+                    <p>Scan this QR code with your authenticator app:</p>
+                    <img id="signup-qr-image" src="" alt="TOTP QR Code" style="max-width: 180px; margin: 10px 0;" />
+                    <p style="font-size: 12px; color: #666;">Secret: <span id="signup-qr-secret"></span></p>
+                    <div class="form-group" style="margin-top: 16px;">
+                        <label for="signup-verify-code">Enter 6-digit code</label>
+                        <input type="text" id="signup-verify-code" maxlength="6" inputmode="numeric" placeholder="000000" style="text-align:center; font-size:18px; letter-spacing:4px;" />
+                    </div>
+                    <button id="signup-verify-btn" class="btn btn-primary w-100" style="margin-top: 10px;">Verify & Complete</button>
+                </div>
             </div>
         </div>
     </div>

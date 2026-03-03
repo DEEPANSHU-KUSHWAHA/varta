@@ -7,8 +7,9 @@ class AuthManager {
     constructor() {
         this.isAuthenticated = !!localStorage.getItem('token');
         this.user = null;
-        this.totpRequired = false;
-        this.tempToken = null;
+        // no longer storing temporary OTP state
+        // totpRequired and tempToken unused
+
     }
 
     /**
@@ -58,31 +59,29 @@ class AuthManager {
 
             const username = document.getElementById('login-username')?.value;
             const password = document.getElementById('login-password')?.value;
+                const totp = document.getElementById('login-totp')?.value || '';
 
             if (!username || !password) {
-                this.showError('Please enter username and password');
+                this.showError('Username and password are required');
+                return;
+            }
+
+            if (!totp) {
+                this.showError('TOTP code is required');
                 return;
             }
 
             try {
                 this.showLoading('login-form');
 
-                const response = await window.api.login(username, password);
-
+                const response = await window.api.login(username, password, totp);
                 if (!response.success) {
                     this.showError(response.message || 'Login failed');
                     return;
                 }
 
-                // Check if TOTP verification is required
-                if (response.data && response.data.totp_required) {
-                    this.totpRequired = true;
-                    this.tempToken = response.data.temp_token;
-                    this.showOTPForm();
-                } else {
-                    // Login successful
-                    this.handleLoginSuccess(response.data);
-                }
+                // Login successful
+                this.handleLoginSuccess(response.data);
             } catch (error) {
                 this.showError('Login failed: ' + error.message);
             } finally {
@@ -98,6 +97,11 @@ class AuthManager {
         const form = document.getElementById('signup-form');
         if (!form) return;
 
+        const qrSection = document.getElementById('signup-qr-section');
+        const qrImage = document.getElementById('signup-qr-image');
+        const qrSecret = document.getElementById('signup-qr-secret');
+        let tempUserData = null;
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -105,10 +109,13 @@ class AuthManager {
             const email = document.getElementById('signup-email')?.value;
             const password = document.getElementById('signup-password')?.value;
             const confirmPassword = document.getElementById('signup-confirm')?.value;
+            const firstName = document.getElementById('signup-firstname')?.value || '';
+            const lastName = document.getElementById('signup-lastname')?.value || '';
+            const phone = document.getElementById('signup-phone')?.value || '';
 
             // Validation
-            if (!username || !email || !password || !confirmPassword) {
-                this.showError('Please fill in all fields');
+            if (!username || !email || !password || !confirmPassword || !firstName) {
+                this.showError('Please fill in all required fields');
                 return;
             }
 
@@ -125,114 +132,59 @@ class AuthManager {
             try {
                 this.showLoading('signup-form');
 
-                const response = await window.api.signup(username, email, password);
+                const response = await window.api.signup(username, email, password, firstName, lastName, phone);
 
                 if (!response.success) {
                     this.showError(response.message || 'Signup failed');
                     return;
                 }
 
-                // Signup successful, show success message
-                this.showSuccess('Account created successfully! Please log in.');
+                // store user info for otp step
+                tempUserData = response.data;
 
-                // Reset form and switch to login
-                form.reset();
-                setTimeout(() => {
-                    document.querySelector('[data-tab="login"]').click();
-                }, 2000);
+                // show QR and secret
+                if (qrImage && response.data.qr_code) {
+                    qrImage.src = response.data.qr_code;
+                }
+                if (qrSecret && response.data.secret) {
+                    qrSecret.textContent = response.data.secret;
+                }
+
+                // hide original form and display QR section
+                form.style.display = 'none';
+                if (qrSection) qrSection.style.display = 'block';
             } catch (error) {
                 this.showError('Signup failed: ' + error.message);
             } finally {
                 this.hideLoading('signup-form');
             }
         });
-    }
 
-    /**
-     * Show OTP verification form
-     */
-    showOTPForm() {
-        const authContainer = document.getElementById('auth-container');
-        if (!authContainer) return;
-
-        // Hide login/signup forms
-        document.getElementById('auth-tabs')?.style.display = 'none';
-
-        // Create OTP form
-        const otpForm = document.createElement('div');
-        otpForm.id = 'otp-form-container';
-        otpForm.innerHTML = `
-            <div style="text-align: center; margin-bottom: 30px;">
-                <h2 style="color: #075e54; margin-bottom: 8px;">Two-Factor Authentication</h2>
-                <p style="color: #666; font-size: 14px;">Enter the code from your authenticator app</p>
-            </div>
-
-            <form id="otp-form" style="margin-bottom: 20px;">
-                <div class="form-group">
-                    <label for="otp-code">Enter Code</label>
-                    <input 
-                        type="text" 
-                        id="otp-code" 
-                        placeholder="000000" 
-                        maxlength="6"
-                        inputmode="numeric"
-                        style="text-align: center; font-size: 20px; letter-spacing: 8px;"
-                    />
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Verify</button>
-            </form>
-
-            <button id="back-to-login" style="width: 100%; padding: 10px; border: 1px solid #ddd; background: white; color: #075e54; border-radius: 6px; cursor: pointer; font-weight: 600;">Back to Login</button>
-        `;
-
-        authContainer.appendChild(otpForm);
-
-        // Setup OTP form
-        document.getElementById('otp-form')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.verifyOTP();
-        });
-
-        // Setup back button
-        document.getElementById('back-to-login')?.addEventListener('click', () => {
-            otpForm.remove();
-            document.getElementById('auth-tabs').style.display = 'block';
-            this.totpRequired = false;
-            this.tempToken = null;
-        });
-
-        // Auto-focus on the code input
-        setTimeout(() => document.getElementById('otp-code')?.focus(), 100);
-    }
-
-    /**
-     * Verify OTP code
-     */
-    async verifyOTP() {
-        const code = document.getElementById('otp-code')?.value;
-
-        if (!code || code.length !== 6) {
-            this.showError('Please enter a valid 6-digit code');
-            return;
-        }
-
-        try {
-            this.showLoading('otp-form');
-
-            const response = await window.api.verifyOTP(code);
-
-            if (!response.success) {
-                this.showError(response.message || 'Invalid code');
+        // verify code after scanning QR
+        document.getElementById('signup-verify-btn')?.addEventListener('click', async () => {
+            const code = document.getElementById('signup-verify-code')?.value;
+            if (!code || code.length !== 6) {
+                this.showError('Please enter a valid 6-digit code');
                 return;
             }
-
-            // OTP verified, login successful
-            this.handleLoginSuccess(response.data);
-        } catch (error) {
-            this.showError('Verification failed: ' + error.message);
-        } finally {
-            this.hideLoading('otp-form');
-        }
+            try {
+                this.showLoading('signup-verify-btn');
+                const response = await window.api.verifyOTP(code, tempUserData?.user_id);
+                if (!response.success) {
+                    this.showError(response.message || 'Verification failed');
+                    return;
+                }
+                this.showSuccess('Account created and verified! You may now log in.');
+                // optionally auto-login if token present
+                if (response.data && response.data.token) {
+                    this.handleLoginSuccess(response.data);
+                }
+            } catch (error) {
+                this.showError('Verification error: ' + error.message);
+            } finally {
+                this.hideLoading('signup-verify-btn');
+            }
+        });
     }
 
     /**

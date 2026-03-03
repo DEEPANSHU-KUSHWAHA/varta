@@ -1,10 +1,9 @@
 <?php
 require_once __DIR__ . '/../resources/db.php';
+require_once __DIR__ . '/../resources/flash.php';
+
 /** @var mysqli $conn */
 global $conn;
-
-require_once __DIR__ . '/../resources/db.php';
-require_once __DIR__ . '/../resources/flash.php';
 
 header('Content-Type: application/json');
 
