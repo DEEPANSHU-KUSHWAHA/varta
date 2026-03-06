@@ -12,8 +12,9 @@ session_destroy();
 <head>
     <meta charset="UTF-8">
     <title>Logged Out - Varta</title>
-    <link rel="stylesheet" href="css/auth.css">
-    <meta http-equiv="refresh" content="3;url=index.php?page=login">
+    <link rel="stylesheet" href="/public/css/theme.css">
+    <link rel="stylesheet" href="/public/css/auth.css">
+    <meta http-equiv="refresh" content="3;url=/index.php?page=login">
 </head>
 <body>
     <div class="auth-container logout">

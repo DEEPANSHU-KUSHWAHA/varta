@@ -1,9 +1,4 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    color: #fff;
-}
+/* theme.css provides root variables and resets; this file extends them */
 
 #content {
     display: flex;
@@ -21,16 +16,24 @@ body {
     box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     width: 400px;
     margin-top: 80px;
+    backdrop-filter: blur(4px);
 }
 
 .home-container h1 {
     margin-bottom: 15px;
     font-size: 2.2em;
+    font-family: 'Orbitron', sans-serif;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
 }
 
 .home-container p {
     margin-bottom: 30px;
     font-size: 1.2em;
+    color: var(--text-muted);
 }
 
 .home-actions {
@@ -42,22 +45,83 @@ body {
 .home-actions .btn {
     display: inline-block;
     padding: 12px 24px;
-    background: #4CAF50;
-    color: #fff;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: var(--dark);
     text-decoration: none;
     font-weight: bold;
     border-radius: 6px;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .home-actions .btn:hover {
-    background: #45a049;
+    box-shadow: 0 0 20px rgba(0,212,255,0.4);
+    transform: translateY(-2px) scale(1.02);
 }
 
 /* Variant for signup button */
 .home-actions .btn.signup {
-    background: #2196F3;
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
 }
-.home-actions .btn.signup:hover {
-    background: #1976D2;
+
+.features {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-top: 60px;
 }
+
+.feature {
+    width: 250px;
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.feature:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.feature h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.4em;
+    margin-bottom: 10px;
+    color: var(--primary);
+}
+
+.feature p {
+    font-size: 0.95em;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+/* internal home tweaks */
+.internal-home {
+    max-width: 600px;
+}
+
+/* landing page specific overrides */
+.landing-hero {
+    margin-top: 120px;
+    padding: 60px 20px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 16px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+}
+
+/* responsive adjustments */
+@media (max-width: 768px) {
+    .home-container {
+        width: 90%;
+        margin-top: 100px;
+        padding: 30px;
+    }
+    .features {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+

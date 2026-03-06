@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Send Notification</title>
-    <link rel="stylesheet" href="public/css/navbar.css">
+    <link rel="stylesheet" href="/public/css/theme.css">
+    <link rel="stylesheet" href="/public/css/navbar.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>

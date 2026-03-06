@@ -27,7 +27,8 @@ $user = $result->fetch_assoc();
 <head>
     <meta charset="UTF-8">
     <title>Profile - Varta</title>
-    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="/public/css/theme.css">
+    <link rel="stylesheet" href="/public/css/auth.css">
 </head>
 <body>
     <div class="auth-container">
@@ -52,8 +53,8 @@ $user = $result->fetch_assoc();
         <?php endif; ?>
 
         <hr>
-        <p><a href="dashboard.php">Back to Dashboard</a></p>
-        <p><a href="settings.php">Edit Account Settings</a></p>
+        <p><a href="/public/dashboard.php">Back to Dashboard</a></p>
+        <p><a href="/public/settings.php">Edit Account Settings</a></p>
         <p><a href="/api/logout.php">Logout</a></p>
     </div>
 </body>

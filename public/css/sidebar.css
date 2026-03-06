@@ -1,12 +1,19 @@
-/* Base sidebar styles */
+/* Futuristic sidebar with glass card and neon accent */
 .sidebar {
-    margin-top: 80px; /* push below logo */
-    background: rgba(0, 0, 0, 0.45);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    width: 200px;
+    margin-top: 100px; /* push below logo */
+    background: rgba(26, 31, 58, 0.85);
+    backdrop-filter: blur(6px);
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    width: 220px;
     transition: transform 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 40;
 }
 
 .sidebar ul {
@@ -16,40 +23,52 @@
 }
 
 .sidebar li {
-    margin: 15px 0;
+    margin: 20px 0;
 }
 
 .sidebar a {
-    color: #fff;
+    color: var(--text);
     text-decoration: none;
-    font-weight: bold;
+    font-weight: 600;
     display: block;
-    padding: 8px 12px;
-    border-radius: 6px;
-    transition: background 0.3s ease;
+    padding: 10px 14px;
+    border-radius: 8px;
+    transition: background 0.3s ease, box-shadow 0.3s;
+    position: relative;
+}
+
+.sidebar a::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--primary);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .sidebar a:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 0 12px var(--primary);
+}
+
+.sidebar a:hover::before {
+    opacity: 1;
 }
 
 /* Responsive rules */
 @media (max-width: 768px) {
     .sidebar {
-        position: fixed;
-        top: 70px; /* below logo/navbar */
-        left: 0;
-        height: 100%;
-        width: 220px;
-        transform: translateX(-100%); /* hidden by default */
-        z-index: 1000;
+        transform: translateX(-100%);
+        width: 200px;
     }
 
     .sidebar.active {
-        transform: translateX(0); /* slide in when active */
+        transform: translateX(0);
     }
 
-    /* Overlay background when sidebar is open */
     .sidebar-overlay {
         display: none;
         position: fixed;
@@ -57,8 +76,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
+        background: rgba(0,0,0,0.6);
+        z-index: 39;
     }
 
     .sidebar-overlay.active {
